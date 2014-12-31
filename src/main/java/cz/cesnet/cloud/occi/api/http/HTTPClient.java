@@ -20,10 +20,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -258,13 +258,52 @@ public class HTTPClient extends Client {
     }
 
     @Override
-    public boolean delete(String resourceType) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public boolean delete(String resourceType) throws CommunicationException {
+        Kind kind;
+        try {
+            kind = getModel().findKindByTerm(resourceType);
+        } catch (AmbiguousIdentifierException ex) {
+            throw new CommunicationException(ex);
+        }
+        if (kind == null) {
+            throw new CommunicationException("unknown resource type '" + resourceType + "'");
+        }
+        HttpDelete httpDelete = HTTPHelper.prepareDelete(kind.getLocation());
+
+        return runDelete(httpDelete);
     }
 
     @Override
-    public boolean delete(URI resourceIdentifier) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public boolean delete(URI resourceIdentifier) throws CommunicationException {
+        Kind kind = getModel().findKindByIdentifier(resourceIdentifier);
+        HttpDelete httpDelete;
+        if (kind != null) {
+            httpDelete = HTTPHelper.prepareDelete(kind.getLocation());
+        } else {
+            httpDelete = HTTPHelper.prepareDelete(resourceIdentifier);
+        }
+
+        return runDelete(httpDelete);
+    }
+
+    private boolean runDelete(HttpDelete httpDelete) throws CommunicationException {
+        if (!isConnected()) {
+            connect();
+        }
+        LOGGER.debug("Running delete...");
+        HttpHost target = new HttpHost(getEndpoint().getHost(), getEndpoint().getPort());
+        try {
+            try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
+                LOGGER.debug("Executing request {} to target {}", httpDelete.getRequestLine(), target);
+                try (CloseableHttpResponse response = httpclient.execute(target, httpDelete, context)) {
+                    LOGGER.debug("Response: {}\nHeaders: {}", response.getStatusLine().toString(), response.getAllHeaders());
+
+                    return response.getStatusLine().getStatusCode() == HttpStatus.SC_OK;
+                }
+            }
+        } catch (IOException ex) {
+            throw new CommunicationException(ex);
+        }
     }
 
     @Override
