@@ -12,20 +12,26 @@ import cz.cesnet.cloud.occi.core.Entity;
 import cz.cesnet.cloud.occi.core.Kind;
 import cz.cesnet.cloud.occi.exception.AmbiguousIdentifierException;
 import cz.cesnet.cloud.occi.exception.ParsingException;
+import cz.cesnet.cloud.occi.exception.RenderingException;
 import cz.cesnet.cloud.occi.parser.CollectionType;
 import cz.cesnet.cloud.occi.parser.MediaType;
 import cz.cesnet.cloud.occi.parser.TextParser;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
@@ -35,6 +41,7 @@ import org.slf4j.LoggerFactory;
 public class HTTPClient extends Client {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HTTPClient.class);
+    private static final String ACTION_URL_PARAMETER = "?action=";
     private final MediaType mediaType = MediaType.TEXT_PLAIN;
     private HttpClientContext context;
     private final TextParser parser = new TextParser();
@@ -73,19 +80,19 @@ public class HTTPClient extends Client {
         obtainModel();
     }
 
-    private String runGet(HttpGet httpGet) throws CommunicationException {
+    private String runRequestReturnResponseBody(HttpRequest httpRequest, int status) throws CommunicationException {
         if (!isConnected()) {
             connect();
         }
-        LOGGER.debug("Running get...");
+        LOGGER.debug("Running request...");
         HttpHost target = new HttpHost(getEndpoint().getHost(), getEndpoint().getPort());
         try {
             try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-                LOGGER.debug("Executing request {} to target {}", httpGet.getRequestLine(), target);
-                try (CloseableHttpResponse response = httpclient.execute(target, httpGet, context)) {
+                LOGGER.debug("Executing request {} to target {}", httpRequest.getRequestLine(), target);
+                try (CloseableHttpResponse response = httpclient.execute(target, httpRequest, context)) {
                     String responseBody = EntityUtils.toString(response.getEntity());
                     LOGGER.debug("Response: {}\nHeaders: {}\nBody: {}", response.getStatusLine().toString(), response.getAllHeaders(), responseBody);
-                    if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+                    if (response.getStatusLine().getStatusCode() != status) {
                         throw new CommunicationException(response.getStatusLine().toString());
                     }
 
@@ -97,11 +104,39 @@ public class HTTPClient extends Client {
         }
     }
 
+    private String runRequestReturnResponseBody(HttpRequest httpRequest) throws CommunicationException {
+        return runRequestReturnResponseBody(httpRequest, HttpStatus.SC_OK);
+    }
+
+    private boolean runRequestReturnStatus(HttpRequest httpRequest, int status) throws CommunicationException {
+        if (!isConnected()) {
+            connect();
+        }
+        LOGGER.debug("Running request...");
+        HttpHost target = new HttpHost(getEndpoint().getHost(), getEndpoint().getPort());
+        try {
+            try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
+                LOGGER.debug("Executing request {} to target {}", httpRequest.getRequestLine(), target);
+                try (CloseableHttpResponse response = httpclient.execute(target, httpRequest, context)) {
+                    LOGGER.debug("Response: {}\nHeaders: {}", response.getStatusLine().toString(), response.getAllHeaders());
+
+                    return response.getStatusLine().getStatusCode() == status;
+                }
+            }
+        } catch (IOException ex) {
+            throw new CommunicationException(ex);
+        }
+    }
+
+    private boolean runRequestReturnStatus(HttpRequest httpRequest) throws CommunicationException {
+        return runRequestReturnStatus(httpRequest, HttpStatus.SC_OK);
+    }
+
     private void obtainModel() throws CommunicationException {
         try {
             LOGGER.debug("Obtaining model...");
             HttpGet httpGet = HTTPHelper.prepareGet(Client.MODEL_URI);
-            String modelString = runGet(httpGet);
+            String modelString = runRequestReturnResponseBody(httpGet);
             setModel(parser.parseModel(mediaType, modelString, null));
             LOGGER.debug("Model: {}", getModel());
         } catch (ParsingException ex) {
@@ -122,7 +157,7 @@ public class HTTPClient extends Client {
         } else {
             Kind kind;
             try {
-                kind = getModel().findKindByTerm(resourceType);
+                kind = getModel().findKind(resourceType);
             } catch (AmbiguousIdentifierException ex) {
                 throw new CommunicationException(ex);
             }
@@ -137,7 +172,7 @@ public class HTTPClient extends Client {
 
     @Override
     public List<URI> list(URI resourceIdentifier) throws CommunicationException {
-        Kind kind = getModel().findKindByIdentifier(resourceIdentifier);
+        Kind kind = getModel().findKind(resourceIdentifier);
         if (kind == null) {
             throw new CommunicationException("unknown resource identifier '" + resourceIdentifier + "'");
         }
@@ -147,7 +182,7 @@ public class HTTPClient extends Client {
 
     private List<URI> runListGet(HttpGet httpGet) throws CommunicationException {
         try {
-            String locationsString = runGet(httpGet);
+            String locationsString = runRequestReturnResponseBody(httpGet);
             List<URI> locations = parser.parseLocations(mediaType, locationsString, null);
             LOGGER.debug("Locations: {}", locations);
             return locations;
@@ -171,7 +206,7 @@ public class HTTPClient extends Client {
     public List<Entity> describe(String resourceType) throws CommunicationException {
         Model model = getModel();
         try {
-            Kind kind = model.findKindByTerm(resourceType);
+            Kind kind = model.findKind(resourceType);
             if (kind == null) {
                 throw new CommunicationException("unknown resource type '" + resourceType + "'");
             }
@@ -189,7 +224,7 @@ public class HTTPClient extends Client {
     @Override
     public List<Entity> describe(URI resourceIdentifier) throws CommunicationException {
         Model model = getModel();
-        Kind kind = model.findKindByIdentifier(resourceIdentifier);
+        Kind kind = model.findKind(resourceIdentifier);
         if (kind != null) {
             CollectionType type = model.findKindType(kind);
             if (type == null) {
@@ -205,13 +240,7 @@ public class HTTPClient extends Client {
     }
 
     private Collection describeLocation(URI location) throws CommunicationException {
-        if (location.getHost() == null) {
-            try {
-                location = new URI(getEndpoint().toString() + location.toString()).normalize();
-            } catch (URISyntaxException ex) {
-                throw new CommunicationException(ex);
-            }
-        }
+        location = getFullUri(location);
         String path = location.getPath();
         String[] segments = TextParser.divideUriByLastSegment(path);
         CollectionType type = getModel().findKindType(segments[1]);
@@ -243,7 +272,7 @@ public class HTTPClient extends Client {
 
     private Collection runDescribeGet(HttpGet httpGet, CollectionType type) throws CommunicationException {
         try {
-            String entityString = runGet(httpGet);
+            String entityString = runRequestReturnResponseBody(httpGet);
             Collection collection = parser.parseCollection(mediaType, entityString, null, type);
             LOGGER.debug("Collection: {}", collection);
             return collection;
@@ -253,15 +282,34 @@ public class HTTPClient extends Client {
     }
 
     @Override
-    public URI create(Entity entity) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public URI create(Entity entity) throws CommunicationException {
+        Kind kind = entity.getKind();
+        if (kind == null) {
+            throw new CommunicationException("entity with empty kind");
+        }
+
+        HttpPost httpPost = HTTPHelper.preparePost(kind.getLocation());
+        try {
+            HttpEntity httpEntity = new StringEntity(entity.toText());
+            httpPost.setEntity(httpEntity);
+
+            String responseString = runRequestReturnResponseBody(httpPost, HttpStatus.SC_CREATED);
+            List<URI> locations = parser.parseLocations(mediaType, responseString, null);
+            if (locations == null || locations.isEmpty()) {
+                throw new CommunicationException("no location returned");
+            }
+
+            return locations.get(0);
+        } catch (UnsupportedEncodingException | RenderingException | ParsingException ex) {
+            throw new CommunicationException(ex);
+        }
     }
 
     @Override
     public boolean delete(String resourceType) throws CommunicationException {
         Kind kind;
         try {
-            kind = getModel().findKindByTerm(resourceType);
+            kind = getModel().findKind(resourceType);
         } catch (AmbiguousIdentifierException ex) {
             throw new CommunicationException(ex);
         }
@@ -270,50 +318,79 @@ public class HTTPClient extends Client {
         }
         HttpDelete httpDelete = HTTPHelper.prepareDelete(kind.getLocation());
 
-        return runDelete(httpDelete);
+        return runRequestReturnStatus(httpDelete);
     }
 
     @Override
     public boolean delete(URI resourceIdentifier) throws CommunicationException {
-        Kind kind = getModel().findKindByIdentifier(resourceIdentifier);
+        Kind kind = getModel().findKind(resourceIdentifier);
         HttpDelete httpDelete;
         if (kind != null) {
             httpDelete = HTTPHelper.prepareDelete(kind.getLocation());
         } else {
+            resourceIdentifier = getFullUri(resourceIdentifier);
             httpDelete = HTTPHelper.prepareDelete(resourceIdentifier);
         }
 
-        return runDelete(httpDelete);
+        return runRequestReturnStatus(httpDelete);
     }
 
-    private boolean runDelete(HttpDelete httpDelete) throws CommunicationException {
-        if (!isConnected()) {
-            connect();
-        }
-        LOGGER.debug("Running delete...");
-        HttpHost target = new HttpHost(getEndpoint().getHost(), getEndpoint().getPort());
+    @Override
+    public boolean trigger(String resourceType, ActionInstance action) throws CommunicationException {
+        Kind kind;
         try {
-            try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-                LOGGER.debug("Executing request {} to target {}", httpDelete.getRequestLine(), target);
-                try (CloseableHttpResponse response = httpclient.execute(target, httpDelete, context)) {
-                    LOGGER.debug("Response: {}\nHeaders: {}", response.getStatusLine().toString(), response.getAllHeaders());
+            kind = getModel().findKind(resourceType);
+        } catch (AmbiguousIdentifierException ex) {
+            throw new CommunicationException(ex);
+        }
+        if (kind == null) {
+            throw new CommunicationException("unknown resource type '" + resourceType + "'");
+        }
 
-                    return response.getStatusLine().getStatusCode() == HttpStatus.SC_OK;
-                }
-            }
-        } catch (IOException ex) {
+        try {
+            String url = kind.getLocation().toString() + ACTION_URL_PARAMETER + action.getAction().getTerm();
+            HttpEntity httpEntity = new StringEntity(action.toText());
+            HttpPost httpPost = HTTPHelper.preparePost(url);
+            httpPost.setEntity(httpEntity);
+
+            return runRequestReturnStatus(httpPost);
+        } catch (UnsupportedEncodingException ex) {
             throw new CommunicationException(ex);
         }
     }
 
     @Override
-    public boolean trigger(String resourceType, ActionInstance action) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public boolean trigger(URI resourceIdentifier, ActionInstance action) throws CommunicationException {
+        Kind kind = getModel().findKind(resourceIdentifier);
+        String url;
+        if (kind != null) {
+            url = kind.getLocation().toString() + ACTION_URL_PARAMETER + action.getAction().getTerm();
+        } else {
+            resourceIdentifier = getFullUri(resourceIdentifier);
+            url = resourceIdentifier.toString() + ACTION_URL_PARAMETER + action.getAction().getTerm();
+        }
+
+        try {
+            HttpEntity httpEntity = new StringEntity(action.toText());
+            HttpPost httpPost = HTTPHelper.preparePost(url);
+            httpPost.setEntity(httpEntity);
+
+            return runRequestReturnStatus(httpPost);
+        } catch (UnsupportedEncodingException ex) {
+            throw new CommunicationException(ex);
+        }
     }
 
-    @Override
-    public boolean trigger(URI resourceIdentifier, ActionInstance action) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    private URI getFullUri(URI uri) throws CommunicationException {
+        if (uri.getHost() == null) {
+            try {
+                uri = new URI(getEndpoint().toString() + uri.toString()).normalize();
+            } catch (URISyntaxException ex) {
+                throw new CommunicationException(ex);
+            }
+        }
+
+        return uri;
     }
 
     @Override

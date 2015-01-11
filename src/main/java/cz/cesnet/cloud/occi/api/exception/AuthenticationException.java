@@ -10,7 +10,7 @@ public class AuthenticationException extends CommunicationException {
         super(message, ex);
     }
 
-    public AuthenticationException(Throwable ex) throws CommunicationException {
+    public AuthenticationException(Throwable ex) {
         super(ex);
     }
 

@@ -64,6 +64,7 @@ public class BasicAuthentication extends HTTPAuthentication {
         credsProvider.setCredentials(
                 new AuthScope(getTarget().getHostName(), getTarget().getPort(), null, authScheme),
                 new UsernamePasswordCredentials(username, password));
+        setCredentialsProvider(credsProvider);
         super.authenticate();
     }
 }

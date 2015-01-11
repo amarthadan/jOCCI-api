@@ -5,6 +5,7 @@ import org.apache.http.HttpMessage;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.protocol.HTTP;
 
 public class HTTPHelper {
@@ -67,6 +68,26 @@ public class HTTPHelper {
 
     public static HttpDelete prepareDelete(URI uri) {
         return prepareDelete(uri, "text/plain");
+    }
+
+    public static HttpPost preparePost(String uri, String contentType) {
+        HttpPost httpPost = new HttpPost(uri);
+        prepareHeaders(httpPost, contentType);
+        return httpPost;
+    }
+
+    public static HttpPost preparePost(String uri) {
+        return preparePost(uri, "text/plain");
+    }
+
+    public static HttpPost preparePost(URI uri, String contentType) {
+        HttpPost httpPost = new HttpPost(uri);
+        prepareHeaders(httpPost, contentType);
+        return httpPost;
+    }
+
+    public static HttpPost preparePost(URI uri) {
+        return preparePost(uri, "text/plain");
     }
 
     private static void prepareHeaders(HttpMessage httpmessage, String contentType) {

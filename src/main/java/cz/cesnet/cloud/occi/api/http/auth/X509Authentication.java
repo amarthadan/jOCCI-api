@@ -1,24 +1,42 @@
 package cz.cesnet.cloud.occi.api.http.auth;
 
 import cz.cesnet.cloud.occi.api.Authentication;
+import cz.cesnet.cloud.occi.api.exception.AuthenticationException;
+import cz.cesnet.cloud.occi.api.exception.CommunicationException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import javax.net.ssl.SSLContext;
+import org.apache.http.conn.ssl.SSLContexts;
 
 public class X509Authentication extends HTTPAuthentication {
 
     private static final String IDENTIFIER = "OCCIX509Authentication";
     private String certificate;
     private String password;
-    private String CAPath;
-    private String CAFile;
 
     public X509Authentication(String certificate, String password) {
-        this(certificate, password, null, null);
-    }
+        if (certificate == null) {
+            throw new NullPointerException("certificate cannot be null");
+        }
+        if (certificate.isEmpty()) {
+            throw new IllegalArgumentException("certificate cannot be empty");
+        }
+        if (password == null) {
+            throw new NullPointerException("password cannot be null");
+        }
+        if (password.isEmpty()) {
+            throw new IllegalArgumentException("password cannot be empty");
+        }
 
-    public X509Authentication(String certificate, String password, String CAPath, String CAFile) {
         this.certificate = certificate;
         this.password = password;
-        this.CAPath = CAPath;
-        this.CAFile = CAFile;
     }
 
     public String getCertificate() {
@@ -26,6 +44,13 @@ public class X509Authentication extends HTTPAuthentication {
     }
 
     public void setCertificate(String certificate) {
+        if (certificate == null) {
+            throw new NullPointerException("certificate cannot be null");
+        }
+        if (certificate.isEmpty()) {
+            throw new IllegalArgumentException("certificate cannot be empty");
+        }
+
         this.certificate = certificate;
     }
 
@@ -34,23 +59,14 @@ public class X509Authentication extends HTTPAuthentication {
     }
 
     public void setPassword(String password) {
+        if (password == null) {
+            throw new NullPointerException("password cannot be null");
+        }
+        if (password.isEmpty()) {
+            throw new IllegalArgumentException("password cannot be empty");
+        }
+
         this.password = password;
-    }
-
-    public String getCAPath() {
-        return CAPath;
-    }
-
-    public void setCAPath(String CAPath) {
-        this.CAPath = CAPath;
-    }
-
-    public String getCAFile() {
-        return CAFile;
-    }
-
-    public void setCAFile(String CAFile) {
-        this.CAFile = CAFile;
     }
 
     @Override
@@ -64,8 +80,32 @@ public class X509Authentication extends HTTPAuthentication {
     }
 
     @Override
-    public void authenticate() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    protected SSLContext createSSLContext() throws AuthenticationException {
+        KeyStore trustStore = loadCAs();
+        if (trustStore == null) {
+            return null;
+        }
+
+        try {
+            KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            FileInputStream instream = new FileInputStream(new File(certificate));
+            keyStore.load(instream, password.toCharArray());
+
+            SSLContext sslContext = SSLContexts.custom()
+                    .loadTrustMaterial(trustStore)
+                    .loadKeyMaterial(keyStore, password.toCharArray())
+                    .build();
+
+            return sslContext;
+        } catch (KeyStoreException | KeyManagementException | NoSuchAlgorithmException |
+                CertificateException | UnrecoverableKeyException | IOException ex) {
+            throw new AuthenticationException(ex);
+        }
+
     }
 
+    @Override
+    public void authenticate() throws CommunicationException {
+        super.authenticate();
+    }
 }
