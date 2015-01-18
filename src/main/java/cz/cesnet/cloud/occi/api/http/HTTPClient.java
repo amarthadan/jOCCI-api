@@ -30,7 +30,6 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -43,7 +42,7 @@ public class HTTPClient extends Client {
     private static final Logger LOGGER = LoggerFactory.getLogger(HTTPClient.class);
     private static final String ACTION_URL_PARAMETER = "?action=";
     private final MediaType mediaType = MediaType.TEXT_PLAIN;
-    private HttpClientContext context;
+    private CloseableHttpClient client;
     private final TextParser parser = new TextParser();
 
     public HTTPClient(URI endpoint, Authentication authentication, boolean autoconnect) throws CommunicationException {
@@ -73,9 +72,9 @@ public class HTTPClient extends Client {
     @Override
     public void connect() throws CommunicationException {
         HTTPAuthentication auth = (HTTPAuthentication) getAuthentication();
-        auth.setTarget(new HttpHost(getEndpoint().getHost(), getEndpoint().getPort()));
+        auth.setTarget(new HttpHost(getEndpoint().getHost(), getEndpoint().getPort(), getEndpoint().getScheme()));
         auth.authenticate();
-        context = auth.getContext();
+        client = auth.getClient();
         setConnected(true);
         obtainModel();
     }
@@ -85,19 +84,17 @@ public class HTTPClient extends Client {
             connect();
         }
         LOGGER.debug("Running request...");
-        HttpHost target = new HttpHost(getEndpoint().getHost(), getEndpoint().getPort());
+        HttpHost target = new HttpHost(getEndpoint().getHost(), getEndpoint().getPort(), getEndpoint().getScheme());
         try {
-            try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-                LOGGER.debug("Executing request {} to target {}", httpRequest.getRequestLine(), target);
-                try (CloseableHttpResponse response = httpclient.execute(target, httpRequest, context)) {
-                    String responseBody = EntityUtils.toString(response.getEntity());
-                    LOGGER.debug("Response: {}\nHeaders: {}\nBody: {}", response.getStatusLine().toString(), response.getAllHeaders(), responseBody);
-                    if (response.getStatusLine().getStatusCode() != status) {
-                        throw new CommunicationException(response.getStatusLine().toString());
-                    }
-
-                    return responseBody;
+            LOGGER.debug("Executing request {} to target {}", httpRequest.getRequestLine(), target);
+            try (CloseableHttpResponse response = client.execute(target, httpRequest)) {
+                String responseBody = EntityUtils.toString(response.getEntity());
+                LOGGER.debug("Response: {}\nHeaders: {}\nBody: {}", response.getStatusLine().toString(), response.getAllHeaders(), responseBody);
+                if (response.getStatusLine().getStatusCode() != status) {
+                    throw new CommunicationException(response.getStatusLine().toString());
                 }
+
+                return responseBody;
             }
         } catch (IOException ex) {
             throw new CommunicationException(ex);
@@ -113,15 +110,13 @@ public class HTTPClient extends Client {
             connect();
         }
         LOGGER.debug("Running request...");
-        HttpHost target = new HttpHost(getEndpoint().getHost(), getEndpoint().getPort());
+        HttpHost target = new HttpHost(getEndpoint().getHost(), getEndpoint().getPort(), getEndpoint().getScheme());
         try {
-            try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-                LOGGER.debug("Executing request {} to target {}", httpRequest.getRequestLine(), target);
-                try (CloseableHttpResponse response = httpclient.execute(target, httpRequest, context)) {
-                    LOGGER.debug("Response: {}\nHeaders: {}", response.getStatusLine().toString(), response.getAllHeaders());
+            LOGGER.debug("Executing request {} to target {}", httpRequest.getRequestLine(), target);
+            try (CloseableHttpResponse response = client.execute(target, httpRequest)) {
+                LOGGER.debug("Response: {}\nHeaders: {}", response.getStatusLine().toString(), response.getAllHeaders());
 
-                    return response.getStatusLine().getStatusCode() == status;
-                }
+                return response.getStatusLine().getStatusCode() == status;
             }
         } catch (IOException ex) {
             throw new CommunicationException(ex);
