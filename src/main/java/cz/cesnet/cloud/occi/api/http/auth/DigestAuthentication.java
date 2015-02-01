@@ -4,7 +4,7 @@ import org.apache.http.client.config.AuthSchemes;
 
 public class DigestAuthentication extends BasicAuthentication {
 
-    private static final String IDENTIFIER = "OCCIDigestAuthentication";
+    public static final String IDENTIFIER = "OCCIDigestAuthentication";
 
     public DigestAuthentication(String username, String password) {
         super(username, password);

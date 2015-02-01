@@ -4,7 +4,7 @@ import cz.cesnet.cloud.occi.api.Authentication;
 
 public class NoAuthentication extends HTTPAuthentication {
 
-    private static final String IDENTIFIER = "OCCINoAuthentication";
+    public static final String IDENTIFIER = "OCCINoAuthentication";
 
     @Override
     public String getIdentifier() {

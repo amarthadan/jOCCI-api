@@ -24,9 +24,7 @@ import java.util.List;
 import javax.net.ssl.SSLContext;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.AuthCache;
 import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.protocol.HttpClientContext;
@@ -111,7 +109,6 @@ public abstract class HTTPAuthentication implements Authentication {
 
     @Override
     public void authenticate() throws CommunicationException {
-        //createContextIfNotExists();
         HttpClientContext context = HttpClientContext.create();
         SSLContext sslContext = createSSLContext();
         SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext);
@@ -127,7 +124,18 @@ public abstract class HTTPAuthentication implements Authentication {
             try (CloseableHttpResponse response = client.execute(target, httpHead, context)) {
                 LOGGER.debug("Response: {}\nHeaders: {}", response.getStatusLine().toString(), response.getAllHeaders());
                 if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-                    throw new AuthenticationException(response.getStatusLine().toString());
+                    Authentication fallback = getFallback();
+                    if (fallback == null) {
+                        throw new AuthenticationException(response.getStatusLine().toString());
+                    }
+
+                    if (fallback instanceof KeystoneAuthentication) {
+                        KeystoneAuthentication ka = (KeystoneAuthentication) fallback;
+                        ka.setOriginalResponse(response);
+                        ka.authenticate();
+                    } else {
+                        throw new AuthenticationException("unknown fallback method");
+                    }
                 }
 
             }
@@ -136,11 +144,6 @@ public abstract class HTTPAuthentication implements Authentication {
         }
     }
 
-//    private void createContextIfNotExists() {
-//        if (context == null) {
-//            context = HttpClientContext.create();
-//        }
-//    }
     protected KeyStore loadCAs() throws AuthenticationException {
         KeyStore keyStore = null;
         if (CAFile != null && !CAFile.isEmpty()) {
@@ -190,7 +193,6 @@ public abstract class HTTPAuthentication implements Authentication {
             File[] certs = CADir.listFiles(fileNameFilter);
             KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
             ks.load(null);
-            CertificateFactory cf = CertificateFactory.getInstance("X.509");
             List<Certificate> rootCertificates = new ArrayList<>();
             PEMReader reader;
             for (File cert : certs) {

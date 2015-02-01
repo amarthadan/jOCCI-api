@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 public class X509Authentication extends HTTPAuthentication {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(X509Authentication.class);
-    private static final String IDENTIFIER = "OCCIX509Authentication";
+    public static final String IDENTIFIER = "OCCIX509Authentication";
     private static final String CERT_BEGIN = "-----BEGIN CERTIFICATE-----";
     private static final String CERT_END = "-----END CERTIFICATE-----";
     private static final String GROUP_WHOLE = "whole";
@@ -142,7 +142,6 @@ public class X509Authentication extends HTTPAuthentication {
     private KeyStore loadUserCertificateFromPEM() throws AuthenticationException {
         try {
             String certFileString = new String(Files.readAllBytes(Paths.get(certificate)));
-            LOGGER.debug("Loaded certificate file:\n" + certFileString);
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
             List<X509Certificate> certChain = new ArrayList<>();
             int startIndex = certFileString.indexOf(CERT_BEGIN, 0);
@@ -151,11 +150,7 @@ public class X509Authentication extends HTTPAuthentication {
             PEMReader reader;
             while (startIndex != -1) {
                 endIndex = certFileString.indexOf(CERT_END, startIndex);
-
-                LOGGER.debug("start index: " + startIndex + ", end index: " + endIndex);
-
                 String oneCert = certFileString.substring(startIndex, endIndex + CERT_END.length());
-                LOGGER.debug("Certificate:\n" + oneCert);
                 reader = new PEMReader(new InputStreamReader(new ByteArrayInputStream(oneCert.getBytes())));
                 X509Certificate cert = (X509Certificate) reader.readObject();
                 if (cert == null) {
@@ -181,8 +176,6 @@ public class X509Authentication extends HTTPAuthentication {
             endIndex = matcher.end(GROUP_WHOLE);
 
             String key = certFileString.substring(startIndex, endIndex).trim();
-            LOGGER.debug("Key:\n" + key);
-
             reader = new PEMReader(new InputStreamReader(new ByteArrayInputStream(key.getBytes())));
 
             Object object = reader.readObject();

@@ -1,14 +1,53 @@
 package cz.cesnet.cloud.occi.api.http.auth;
 
+import com.owlike.genson.stream.JsonReader;
+import com.owlike.genson.stream.JsonWriter;
 import cz.cesnet.cloud.occi.api.Authentication;
+import cz.cesnet.cloud.occi.api.exception.AuthenticationException;
+import cz.cesnet.cloud.occi.api.exception.CommunicationException;
+import cz.cesnet.cloud.occi.api.http.HTTPHelper;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.apache.http.HttpHost;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.protocol.HttpContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class KeystoneAuthentication extends HTTPAuthentication {
 
-    private static final String IDENTIFIER = "OCCIKeystoneAuthentication";
-    private final Authentication originalAuthentication;
+    private static final Logger LOGGER = LoggerFactory.getLogger(KeystoneAuthentication.class);
+    public static final String IDENTIFIER = "OCCIKeystoneAuthentication";
+    private static final String HEADER_AUTH = "Www-Authenticate";
+    private static final String HEADER_X_AUTH_TOKEN = "X-Auth-Token";
+    private static final String GROUP_URI = "uri";
+    private static final String REGEXP_KEYSTONE_URI = "^(?:Keystone|snf-auth) uri='(?<" + GROUP_URI + ">.+)'$";
+    private static final Pattern PATTERN_KEYSTONE_URI = Pattern.compile(REGEXP_KEYSTONE_URI);
+    private static final String PATH_DEFAULT = "/v2.0";
+    private final HTTPAuthentication originalAuthentication;
+    private CloseableHttpResponse originalResponse = null;
+    private String authToken = null;
+    private HttpContext context = HttpClientContext.create();
 
-    public KeystoneAuthentication(Authentication originalAuthentication) {
+    public KeystoneAuthentication(HTTPAuthentication originalAuthentication) {
         this.originalAuthentication = originalAuthentication;
+    }
+
+    public CloseableHttpResponse getOriginalResponse() {
+        return originalResponse;
+    }
+
+    public void setOriginalResponse(CloseableHttpResponse response) {
+        this.originalResponse = response;
     }
 
     @Override
@@ -21,8 +60,174 @@ public class KeystoneAuthentication extends HTTPAuthentication {
         return null;
     }
 
+    private void checkResponse() throws AuthenticationException {
+        if (originalResponse == null) {
+            throw new AuthenticationException("no response to react to");
+        }
+
+        if (!originalResponse.containsHeader(HEADER_AUTH)) {
+            throw new AuthenticationException("missing '" + HEADER_AUTH + "' header");
+        }
+    }
+
     @Override
-    public void authenticate() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void authenticate() throws CommunicationException {
+        checkResponse();
+
+        Matcher matcher = PATTERN_KEYSTONE_URI.matcher(originalResponse.getFirstHeader(HEADER_AUTH).getValue());
+        if (!matcher.find()) {
+            throw new AuthenticationException("incorrect " + HEADER_AUTH + " content");
+        }
+
+        URI keystoneURI = URI.create(matcher.group(GROUP_URI));
+        HttpHost target = new HttpHost(keystoneURI.getHost(), keystoneURI.getPort(), keystoneURI.getScheme());
+        String path = keystoneURI.getPath();
+        if (path == null || path.equals("/")) {
+            path = PATH_DEFAULT;
+        }
+        CloseableHttpClient client = originalAuthentication.getClient();
+
+        String response = authenticateAgainstKeystone(target, path, client, null);
+        authToken = parseId(response);
+        response = getTenants(target, path, client);
+        tryTenants(response, target, path, client);
+
+        LOGGER.debug("token: " + authToken);
+        throw new CommunicationException("app stop");
+    }
+
+    private String authenticateAgainstKeystone(HttpHost target, String path, CloseableHttpClient client, String tenant) throws CommunicationException {
+        try {
+            HttpPost httpPost = HTTPHelper.preparePost(path + "/tokens", "application/json");
+            if (authToken != null) {
+                httpPost.setHeader(HEADER_X_AUTH_TOKEN, authToken);
+            }
+            httpPost.setEntity(new StringEntity(getRequestBody(tenant)));
+
+            return HTTPHelper.runRequestReturnResponseBody(httpPost, target, client, context);
+        } catch (UnsupportedEncodingException ex) {
+            throw new CommunicationException(ex);
+        }
+    }
+
+    private String getTenants(HttpHost target, String path, CloseableHttpClient client) throws CommunicationException {
+        HttpGet httpGet = HTTPHelper.prepareGet(path + "/tenants", "application/json");
+        httpGet.setHeader(HEADER_X_AUTH_TOKEN, authToken);
+
+        return HTTPHelper.runRequestReturnResponseBody(httpGet, target, client, context);
+    }
+
+    private void tryTenants(String json, HttpHost target, String path, CloseableHttpClient client) throws AuthenticationException {
+        try (JsonReader reader = new JsonReader(json)) {
+            reader.beginObject();
+            while (reader.hasNext()) {
+                reader.next();
+                if (!reader.name().equals("tenants")) {
+                    reader.skipValue();
+                    continue;
+                }
+
+                reader.beginArray();
+                while (reader.hasNext()) {
+                    reader.next();
+                    reader.beginObject();
+                    while (reader.hasNext()) {
+                        reader.next();
+                        if (!reader.name().equals("name")) {
+                            reader.skipValue();
+                            continue;
+                        }
+
+                        String tenant = reader.valueAsString();
+                        try {
+                            String response = authenticateAgainstKeystone(target, path, client, tenant);
+                            authToken = parseId(response);
+                            return;
+                        } catch (CommunicationException ex) {
+                            //ignoring and trying the next tenant
+                        }
+                    }
+                    reader.endObject();
+                }
+                reader.endArray();
+                throw new AuthenticationException("no suitable tenant found");
+            }
+        }
+    }
+
+    private String getRequestBody(String tenant) throws AuthenticationException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        JsonWriter writer = new JsonWriter(new OutputStreamWriter(out));
+        writer.beginObject();
+        writer.writeName("auth");
+        writer.beginObject();
+
+        String identifier = originalAuthentication.getIdentifier();
+        switch (identifier) {
+            case X509Authentication.IDENTIFIER: {
+                writer.writeBoolean("voms", true);
+            }
+            break;
+            case BasicAuthentication.IDENTIFIER:
+            case DigestAuthentication.IDENTIFIER: {
+                BasicAuthentication ba = (BasicAuthentication) originalAuthentication;
+                writer.writeName("passwordCredentials");
+                writer.beginObject();
+                writer.writeString("username", ba.getUsername());
+                writer.writeString("password", ba.getPassword());
+                writer.endObject();
+            }
+            break;
+            default:
+                throw new AuthenticationException("unknown original authentication method");
+        }
+
+        if (tenant != null) {
+            writer.writeString("tenantName", tenant);
+        }
+        writer.endObject();
+        writer.endObject();
+        writer.close();
+
+        return out.toString();
+    }
+
+    private String parseId(String json) {
+        try (JsonReader reader = new JsonReader(json)) {
+            String id = null;
+            reader.beginObject();
+            while (reader.hasNext()) {
+                reader.next();
+                if (!reader.name().equals("access")) {
+                    reader.skipValue();
+                    continue;
+                }
+
+                reader.beginObject();
+                while (reader.hasNext()) {
+                    reader.next();
+                    if (!reader.name().equals("token")) {
+                        reader.skipValue();
+                        continue;
+                    }
+
+                    reader.beginObject();
+                    while (reader.hasNext()) {
+                        reader.next();
+                        if (!reader.name().equals("id")) {
+                            reader.skipValue();
+                            continue;
+                        }
+
+                        id = reader.valueAsString();
+                        break;
+                    }
+                    break;
+                }
+                break;
+            }
+
+            return id;
+        }
     }
 }

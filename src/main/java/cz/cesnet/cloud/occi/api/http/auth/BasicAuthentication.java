@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 public class BasicAuthentication extends HTTPAuthentication {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicAuthentication.class);
-    private static final String IDENTIFIER = "OCCIBasicAuthentication";
+    public static final String IDENTIFIER = "OCCIBasicAuthentication";
     private String username;
     private String password;
     private String authScheme;
