@@ -3,8 +3,8 @@ package cz.cesnet.cloud.occi.api.http;
 import cz.cesnet.cloud.occi.api.exception.CommunicationException;
 import java.io.IOException;
 import java.net.URI;
+import org.apache.http.Header;
 import org.apache.http.HttpHost;
-import org.apache.http.HttpMessage;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -13,7 +13,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
@@ -23,89 +22,84 @@ public class HTTPHelper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HTTPHelper.class);
 
-    public static HttpGet prepareGet(String uri, String contentType) {
+    public static HttpGet prepareGet(String uri, Header[] headers) {
         HttpGet httpGet = new HttpGet(uri);
-        prepareHeaders(httpGet, contentType);
+        httpGet.setHeaders(headers);
         return httpGet;
     }
 
     public static HttpGet prepareGet(String uri) {
-        return prepareGet(uri, "text/plain");
+        return prepareGet(uri, null);
     }
 
-    public static HttpHead prepareHead(String uri, String contentType) {
+    public static HttpHead prepareHead(String uri, Header[] headers) {
         HttpHead httpHead = new HttpHead(uri);
-        prepareHeaders(httpHead, contentType);
+        httpHead.setHeaders(headers);
         return httpHead;
     }
 
     public static HttpHead prepareHead(String uri) {
-        return prepareHead(uri, "text/plain");
+        return prepareHead(uri, null);
     }
 
-    public static HttpGet prepareGet(URI uri, String contentType) {
+    public static HttpGet prepareGet(URI uri, Header[] headers) {
         HttpGet httpGet = new HttpGet(uri);
-        prepareHeaders(httpGet, contentType);
+        httpGet.setHeaders(headers);
         return httpGet;
     }
 
     public static HttpGet prepareGet(URI uri) {
-        return prepareGet(uri, "text/plain");
+        return prepareGet(uri, null);
     }
 
-    public static HttpHead prepareHead(URI uri, String contentType) {
+    public static HttpHead prepareHead(URI uri, Header[] headers) {
         HttpHead httpHead = new HttpHead(uri);
-        prepareHeaders(httpHead, contentType);
+        httpHead.setHeaders(headers);
         return httpHead;
     }
 
     public static HttpHead prepareHead(URI uri) {
-        return prepareHead(uri, "text/plain");
+        return prepareHead(uri, null);
     }
 
-    public static HttpDelete prepareDelete(String uri, String contentType) {
+    public static HttpDelete prepareDelete(String uri, Header[] headers) {
         HttpDelete httpDelete = new HttpDelete(uri);
-        prepareHeaders(httpDelete, contentType);
+        httpDelete.setHeaders(headers);
         return httpDelete;
     }
 
     public static HttpDelete prepareDelete(String uri) {
-        return prepareDelete(uri, "text/plain");
+        return prepareDelete(uri, null);
     }
 
-    public static HttpDelete prepareDelete(URI uri, String contentType) {
+    public static HttpDelete prepareDelete(URI uri, Header[] headers) {
         HttpDelete httpDelete = new HttpDelete(uri);
-        prepareHeaders(httpDelete, contentType);
+        httpDelete.setHeaders(headers);
         return httpDelete;
     }
 
     public static HttpDelete prepareDelete(URI uri) {
-        return prepareDelete(uri, "text/plain");
+        return prepareDelete(uri, null);
     }
 
-    public static HttpPost preparePost(String uri, String contentType) {
+    public static HttpPost preparePost(String uri, Header[] headers) {
         HttpPost httpPost = new HttpPost(uri);
-        prepareHeaders(httpPost, contentType);
+        httpPost.setHeaders(headers);
         return httpPost;
     }
 
     public static HttpPost preparePost(String uri) {
-        return preparePost(uri, "text/plain");
+        return preparePost(uri, null);
     }
 
-    public static HttpPost preparePost(URI uri, String contentType) {
+    public static HttpPost preparePost(URI uri, Header[] headers) {
         HttpPost httpPost = new HttpPost(uri);
-        prepareHeaders(httpPost, contentType);
+        httpPost.setHeaders(headers);
         return httpPost;
     }
 
     public static HttpPost preparePost(URI uri) {
-        return preparePost(uri, "text/plain");
-    }
-
-    private static void prepareHeaders(HttpMessage httpmessage, String contentType) {
-        httpmessage.setHeader(HTTP.CONTENT_TYPE, contentType);
-        httpmessage.setHeader("Accept", contentType);
+        return preparePost(uri, null);
     }
 
     public static String runRequestReturnResponseBody(HttpRequest httpRequest, HttpHost target, CloseableHttpClient client, HttpContext context, int status

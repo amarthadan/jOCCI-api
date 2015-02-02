@@ -5,6 +5,7 @@ import com.owlike.genson.stream.JsonWriter;
 import cz.cesnet.cloud.occi.api.Authentication;
 import cz.cesnet.cloud.occi.api.exception.AuthenticationException;
 import cz.cesnet.cloud.occi.api.exception.CommunicationException;
+import cz.cesnet.cloud.occi.api.http.HTTPConnection;
 import cz.cesnet.cloud.occi.api.http.HTTPHelper;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
@@ -12,12 +13,15 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,24 +87,23 @@ public class KeystoneAuthentication extends HTTPAuthentication {
         if (path == null || path.equals("/")) {
             path = PATH_DEFAULT;
         }
-        CloseableHttpClient client = originalAuthentication.getClient();
-        HttpContext context = originalAuthentication.getContext();
+
+        HTTPConnection connection = originalAuthentication.getConnection();
+        CloseableHttpClient client = connection.getClient();
+        HttpContext context = connection.getContext();
 
         String response = authenticateAgainstKeystone(target, path, client, context, null);
         authToken = parseId(response);
         response = getTenants(target, path, client, context);
         tryTenants(response, target, path, client, context);
 
-        LOGGER.debug("token: " + authToken);
-        throw new CommunicationException("app stop");
+        LOGGER.debug("Scoped token: " + authToken);
+        connection.addHeader(new BasicHeader(HEADER_X_AUTH_TOKEN, authToken));
     }
 
     private String authenticateAgainstKeystone(HttpHost target, String path, CloseableHttpClient client, HttpContext context, String tenant) throws CommunicationException {
         try {
-            HttpPost httpPost = HTTPHelper.preparePost(path + "/tokens", "application/json");
-            if (authToken != null) {
-                httpPost.setHeader(HEADER_X_AUTH_TOKEN, authToken);
-            }
+            HttpPost httpPost = HTTPHelper.preparePost(path + "/tokens", getHeaders());
             httpPost.setEntity(new StringEntity(getRequestBody(tenant)));
 
             return HTTPHelper.runRequestReturnResponseBody(httpPost, target, client, context);
@@ -110,9 +113,7 @@ public class KeystoneAuthentication extends HTTPAuthentication {
     }
 
     private String getTenants(HttpHost target, String path, CloseableHttpClient client, HttpContext context) throws CommunicationException {
-        HttpGet httpGet = HTTPHelper.prepareGet(path + "/tenants", "application/json");
-        httpGet.setHeader(HEADER_X_AUTH_TOKEN, authToken);
-
+        HttpGet httpGet = HTTPHelper.prepareGet(path + "/tenants", getHeaders());
         return HTTPHelper.runRequestReturnResponseBody(httpGet, target, client, context);
     }
 
@@ -228,5 +229,20 @@ public class KeystoneAuthentication extends HTTPAuthentication {
 
             return id;
         }
+    }
+
+    private Header[] getHeaders() {
+        Header[] headers;
+        if (authToken != null) {
+            headers = new Header[3];
+            headers[2] = new BasicHeader(HEADER_X_AUTH_TOKEN, authToken);
+        } else {
+            headers = new Header[2];
+        }
+
+        headers[0] = new BasicHeader(HTTP.CONTENT_TYPE, "application/json");
+        headers[1] = new BasicHeader("Accept", "application/json");
+
+        return headers;
     }
 }

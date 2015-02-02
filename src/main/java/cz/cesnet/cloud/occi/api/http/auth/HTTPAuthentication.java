@@ -4,6 +4,7 @@ import cz.cesnet.cloud.occi.api.Authentication;
 import cz.cesnet.cloud.occi.api.Client;
 import cz.cesnet.cloud.occi.api.exception.AuthenticationException;
 import cz.cesnet.cloud.occi.api.exception.CommunicationException;
+import cz.cesnet.cloud.occi.api.http.HTTPConnection;
 import cz.cesnet.cloud.occi.api.http.HTTPHelper;
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,17 +22,17 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import javax.net.ssl.SSLContext;
+import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpHead;
-import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.protocol.HttpContext;
+import org.apache.http.protocol.HTTP;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMReader;
 import org.slf4j.Logger;
@@ -41,8 +42,7 @@ public abstract class HTTPAuthentication implements Authentication {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HTTPAuthentication.class);
     private HttpHost target;
-    private CloseableHttpClient client;
-    private HttpContext context;
+    private HTTPConnection connection;
     private CredentialsProvider credentialsProvider;
     private String CAPath;
     private String CAFile;
@@ -55,20 +55,12 @@ public abstract class HTTPAuthentication implements Authentication {
         this.target = target;
     }
 
-    public CloseableHttpClient getClient() {
-        return client;
+    public HTTPConnection getConnection() {
+        return connection;
     }
 
-    public void setClient(CloseableHttpClient client) {
-        this.client = client;
-    }
-
-    public HttpContext getContext() {
-        return context;
-    }
-
-    public void setContext(HttpContext context) {
-        this.context = context;
+    public void setConnection(HTTPConnection connection) {
+        this.connection = connection;
     }
 
     public CredentialsProvider getCredentialsProvider() {
@@ -118,19 +110,19 @@ public abstract class HTTPAuthentication implements Authentication {
 
     @Override
     public void authenticate() throws CommunicationException {
-        context = HttpClientContext.create();
         SSLContext sslContext = createSSLContext();
         SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext);
 
         LOGGER.debug("Running authentication...");
         try {
-            client = HttpClients.custom()
+            CloseableHttpClient client = HttpClients.custom()
                     .setDefaultCredentialsProvider(credentialsProvider)
                     .setSSLSocketFactory(sslsf)
                     .build();
-            HttpHead httpHead = HTTPHelper.prepareHead(Client.MODEL_URI);
+            connection.setClient(client);
+            HttpHead httpHead = HTTPHelper.prepareHead(Client.MODEL_URI, connection.getHeaders());
             LOGGER.debug("Executing request {} to target {}", httpHead.getRequestLine(), target);
-            try (CloseableHttpResponse response = client.execute(target, httpHead, context)) {
+            try (CloseableHttpResponse response = connection.getClient().execute(target, httpHead, connection.getContext())) {
                 LOGGER.debug("Response: {}\nHeaders: {}", response.getStatusLine().toString(), response.getAllHeaders());
                 if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
                     Authentication fallback = getFallback();

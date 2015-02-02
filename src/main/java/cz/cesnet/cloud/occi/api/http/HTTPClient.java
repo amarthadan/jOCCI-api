@@ -28,8 +28,8 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.protocol.HttpContext;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.protocol.HTTP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,8 +38,7 @@ public class HTTPClient extends Client {
     private static final Logger LOGGER = LoggerFactory.getLogger(HTTPClient.class);
     private static final String ACTION_URL_PARAMETER = "?action=";
     private final MediaType mediaType = MediaType.TEXT_PLAIN;
-    private CloseableHttpClient client;
-    private HttpContext context;
+    private final HTTPConnection connection = new HTTPConnection();
     private HttpHost target;
     private final TextParser parser = new TextParser();
 
@@ -58,6 +57,9 @@ public class HTTPClient extends Client {
         target = new HttpHost(endpoint.getHost(), endpoint.getPort(), endpoint.getScheme());
         setAuthentication(authentication);
 
+        connection.addHeader(new BasicHeader(HTTP.CONTENT_TYPE, "text/plain"));
+        connection.addHeader(new BasicHeader("Accept", "text/plain"));
+
         if (autoconnect) {
             connect();
         }
@@ -75,9 +77,9 @@ public class HTTPClient extends Client {
     public void connect() throws CommunicationException {
         HTTPAuthentication auth = (HTTPAuthentication) getAuthentication();
         auth.setTarget(target);
+        auth.setConnection(connection);
         auth.authenticate();
-        client = auth.getClient();
-        context = auth.getContext();
+
         setConnected(true);
         obtainModel();
     }
@@ -92,8 +94,8 @@ public class HTTPClient extends Client {
         try {
             LOGGER.debug("Obtaining model...");
             checkConnection();
-            HttpGet httpGet = HTTPHelper.prepareGet(Client.MODEL_URI);
-            String modelString = HTTPHelper.runRequestReturnResponseBody(httpGet, target, client, context);
+            HttpGet httpGet = HTTPHelper.prepareGet(Client.MODEL_URI, connection.getHeaders());
+            String modelString = HTTPHelper.runRequestReturnResponseBody(httpGet, target, connection.getClient(), connection.getContext());
             setModel(parser.parseModel(mediaType, modelString, null));
             LOGGER.debug("Model: {}", getModel());
         } catch (ParsingException ex) {
@@ -110,7 +112,7 @@ public class HTTPClient extends Client {
     public List<URI> list(String resourceType) throws CommunicationException {
         HttpGet httpGet;
         if (resourceType.isEmpty()) {
-            httpGet = HTTPHelper.prepareGet("/");
+            httpGet = HTTPHelper.prepareGet("/", connection.getHeaders());
         } else {
             Kind kind;
             try {
@@ -121,7 +123,7 @@ public class HTTPClient extends Client {
             if (kind == null) {
                 throw new CommunicationException("unknown resource type '" + resourceType + "'");
             }
-            httpGet = HTTPHelper.prepareGet(kind.getLocation());
+            httpGet = HTTPHelper.prepareGet(kind.getLocation(), connection.getHeaders());
         }
 
         return runListGet(httpGet);
@@ -133,14 +135,14 @@ public class HTTPClient extends Client {
         if (kind == null) {
             throw new CommunicationException("unknown resource identifier '" + resourceIdentifier + "'");
         }
-        HttpGet httpGet = HTTPHelper.prepareGet(kind.getLocation());
+        HttpGet httpGet = HTTPHelper.prepareGet(kind.getLocation(), connection.getHeaders());
         return runListGet(httpGet);
     }
 
     private List<URI> runListGet(HttpGet httpGet) throws CommunicationException {
         try {
             checkConnection();
-            String locationsString = HTTPHelper.runRequestReturnResponseBody(httpGet, target, client, context);
+            String locationsString = HTTPHelper.runRequestReturnResponseBody(httpGet, target, connection.getClient(), connection.getContext());
             List<URI> locations = parser.parseLocations(mediaType, locationsString, null);
             LOGGER.debug("Locations: {}", locations);
             return locations;
@@ -206,14 +208,14 @@ public class HTTPClient extends Client {
             throw new CommunicationException("unknown resource identifier '" + location + "'");
         }
 
-        HttpGet httpGet = HTTPHelper.prepareGet(location);
+        HttpGet httpGet = HTTPHelper.prepareGet(location, connection.getHeaders());
         return runDescribeGet(httpGet, type);
     }
 
     private List<Entity> describe(List<URI> locations, CollectionType type) throws CommunicationException {
         Collection collection = new Collection();
         for (URI location : locations) {
-            HttpGet httpGet = HTTPHelper.prepareGet(location);
+            HttpGet httpGet = HTTPHelper.prepareGet(location, connection.getHeaders());
             collection.merge(runDescribeGet(httpGet, type));
         }
 
@@ -231,7 +233,7 @@ public class HTTPClient extends Client {
     private Collection runDescribeGet(HttpGet httpGet, CollectionType type) throws CommunicationException {
         try {
             checkConnection();
-            String entityString = HTTPHelper.runRequestReturnResponseBody(httpGet, target, client, context);
+            String entityString = HTTPHelper.runRequestReturnResponseBody(httpGet, target, connection.getClient(), connection.getContext());
             Collection collection = parser.parseCollection(mediaType, entityString, null, type);
             LOGGER.debug("Collection: {}", collection);
             return collection;
@@ -247,13 +249,13 @@ public class HTTPClient extends Client {
             throw new CommunicationException("entity with empty kind");
         }
 
-        HttpPost httpPost = HTTPHelper.preparePost(kind.getLocation());
+        HttpPost httpPost = HTTPHelper.preparePost(kind.getLocation(), connection.getHeaders());
         try {
             HttpEntity httpEntity = new StringEntity(entity.toText());
             httpPost.setEntity(httpEntity);
 
             checkConnection();
-            String responseString = HTTPHelper.runRequestReturnResponseBody(httpPost, target, client, context, HttpStatus.SC_CREATED);
+            String responseString = HTTPHelper.runRequestReturnResponseBody(httpPost, target, connection.getClient(), connection.getContext(), HttpStatus.SC_CREATED);
             List<URI> locations = parser.parseLocations(mediaType, responseString, null);
             if (locations == null || locations.isEmpty()) {
                 throw new CommunicationException("no location returned");
@@ -276,10 +278,10 @@ public class HTTPClient extends Client {
         if (kind == null) {
             throw new CommunicationException("unknown resource type '" + resourceType + "'");
         }
-        HttpDelete httpDelete = HTTPHelper.prepareDelete(kind.getLocation());
+        HttpDelete httpDelete = HTTPHelper.prepareDelete(kind.getLocation(), connection.getHeaders());
 
         checkConnection();
-        return HTTPHelper.runRequestReturnStatus(httpDelete, target, client, context);
+        return HTTPHelper.runRequestReturnStatus(httpDelete, target, connection.getClient(), connection.getContext());
     }
 
     @Override
@@ -287,14 +289,14 @@ public class HTTPClient extends Client {
         Kind kind = getModel().findKind(resourceIdentifier);
         HttpDelete httpDelete;
         if (kind != null) {
-            httpDelete = HTTPHelper.prepareDelete(kind.getLocation());
+            httpDelete = HTTPHelper.prepareDelete(kind.getLocation(), connection.getHeaders());
         } else {
             resourceIdentifier = getFullUri(resourceIdentifier);
-            httpDelete = HTTPHelper.prepareDelete(resourceIdentifier);
+            httpDelete = HTTPHelper.prepareDelete(resourceIdentifier, connection.getHeaders());
         }
 
         checkConnection();
-        return HTTPHelper.runRequestReturnStatus(httpDelete, target, client, context);
+        return HTTPHelper.runRequestReturnStatus(httpDelete, target, connection.getClient(), connection.getContext());
     }
 
     @Override
@@ -312,11 +314,11 @@ public class HTTPClient extends Client {
         try {
             String url = kind.getLocation().toString() + ACTION_URL_PARAMETER + action.getAction().getTerm();
             HttpEntity httpEntity = new StringEntity(action.toText());
-            HttpPost httpPost = HTTPHelper.preparePost(url);
+            HttpPost httpPost = HTTPHelper.preparePost(url, connection.getHeaders());
             httpPost.setEntity(httpEntity);
 
             checkConnection();
-            return HTTPHelper.runRequestReturnStatus(httpPost, target, client, context);
+            return HTTPHelper.runRequestReturnStatus(httpPost, target, connection.getClient(), connection.getContext());
         } catch (UnsupportedEncodingException ex) {
             throw new CommunicationException(ex);
         }
@@ -335,11 +337,11 @@ public class HTTPClient extends Client {
 
         try {
             HttpEntity httpEntity = new StringEntity(action.toText());
-            HttpPost httpPost = HTTPHelper.preparePost(url);
+            HttpPost httpPost = HTTPHelper.preparePost(url, connection.getHeaders());
             httpPost.setEntity(httpEntity);
 
             checkConnection();
-            return HTTPHelper.runRequestReturnStatus(httpPost, target, client, context);
+            return HTTPHelper.runRequestReturnStatus(httpPost, target, connection.getClient(), connection.getContext());
         } catch (UnsupportedEncodingException ex) {
             throw new CommunicationException(ex);
         }
