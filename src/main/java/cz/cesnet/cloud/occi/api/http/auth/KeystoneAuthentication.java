@@ -16,7 +16,6 @@ import org.apache.http.HttpHost;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.protocol.HttpContext;
@@ -36,7 +35,6 @@ public class KeystoneAuthentication extends HTTPAuthentication {
     private final HTTPAuthentication originalAuthentication;
     private CloseableHttpResponse originalResponse = null;
     private String authToken = null;
-    private HttpContext context = HttpClientContext.create();
 
     public KeystoneAuthentication(HTTPAuthentication originalAuthentication) {
         this.originalAuthentication = originalAuthentication;
@@ -86,17 +84,18 @@ public class KeystoneAuthentication extends HTTPAuthentication {
             path = PATH_DEFAULT;
         }
         CloseableHttpClient client = originalAuthentication.getClient();
+        HttpContext context = originalAuthentication.getContext();
 
-        String response = authenticateAgainstKeystone(target, path, client, null);
+        String response = authenticateAgainstKeystone(target, path, client, context, null);
         authToken = parseId(response);
-        response = getTenants(target, path, client);
-        tryTenants(response, target, path, client);
+        response = getTenants(target, path, client, context);
+        tryTenants(response, target, path, client, context);
 
         LOGGER.debug("token: " + authToken);
         throw new CommunicationException("app stop");
     }
 
-    private String authenticateAgainstKeystone(HttpHost target, String path, CloseableHttpClient client, String tenant) throws CommunicationException {
+    private String authenticateAgainstKeystone(HttpHost target, String path, CloseableHttpClient client, HttpContext context, String tenant) throws CommunicationException {
         try {
             HttpPost httpPost = HTTPHelper.preparePost(path + "/tokens", "application/json");
             if (authToken != null) {
@@ -110,14 +109,14 @@ public class KeystoneAuthentication extends HTTPAuthentication {
         }
     }
 
-    private String getTenants(HttpHost target, String path, CloseableHttpClient client) throws CommunicationException {
+    private String getTenants(HttpHost target, String path, CloseableHttpClient client, HttpContext context) throws CommunicationException {
         HttpGet httpGet = HTTPHelper.prepareGet(path + "/tenants", "application/json");
         httpGet.setHeader(HEADER_X_AUTH_TOKEN, authToken);
 
         return HTTPHelper.runRequestReturnResponseBody(httpGet, target, client, context);
     }
 
-    private void tryTenants(String json, HttpHost target, String path, CloseableHttpClient client) throws AuthenticationException {
+    private void tryTenants(String json, HttpHost target, String path, CloseableHttpClient client, HttpContext context) throws AuthenticationException {
         try (JsonReader reader = new JsonReader(json)) {
             reader.beginObject();
             while (reader.hasNext()) {
@@ -140,7 +139,7 @@ public class KeystoneAuthentication extends HTTPAuthentication {
 
                         String tenant = reader.valueAsString();
                         try {
-                            String response = authenticateAgainstKeystone(target, path, client, tenant);
+                            String response = authenticateAgainstKeystone(target, path, client, context, tenant);
                             authToken = parseId(response);
                             return;
                         } catch (CommunicationException ex) {

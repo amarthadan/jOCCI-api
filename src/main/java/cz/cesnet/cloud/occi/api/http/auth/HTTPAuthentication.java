@@ -17,7 +17,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +31,7 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.protocol.HttpContext;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMReader;
 import org.slf4j.Logger;
@@ -42,6 +42,7 @@ public abstract class HTTPAuthentication implements Authentication {
     private static final Logger LOGGER = LoggerFactory.getLogger(HTTPAuthentication.class);
     private HttpHost target;
     private CloseableHttpClient client;
+    private HttpContext context;
     private CredentialsProvider credentialsProvider;
     private String CAPath;
     private String CAFile;
@@ -60,6 +61,14 @@ public abstract class HTTPAuthentication implements Authentication {
 
     public void setClient(CloseableHttpClient client) {
         this.client = client;
+    }
+
+    public HttpContext getContext() {
+        return context;
+    }
+
+    public void setContext(HttpContext context) {
+        this.context = context;
     }
 
     public CredentialsProvider getCredentialsProvider() {
@@ -109,7 +118,7 @@ public abstract class HTTPAuthentication implements Authentication {
 
     @Override
     public void authenticate() throws CommunicationException {
-        HttpClientContext context = HttpClientContext.create();
+        context = HttpClientContext.create();
         SSLContext sslContext = createSSLContext();
         SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext);
 

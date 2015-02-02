@@ -108,25 +108,6 @@ public class HTTPHelper {
         httpmessage.setHeader("Accept", contentType);
     }
 
-    public static String runRequestReturnResponseBody(HttpRequest httpRequest, HttpHost target, CloseableHttpClient client, int status
-    ) throws CommunicationException {
-        LOGGER.debug("Running request...");
-        try {
-            LOGGER.debug("Executing request {} to target {}", httpRequest.getRequestLine(), target);
-            try (CloseableHttpResponse response = client.execute(target, httpRequest)) {
-                String responseBody = EntityUtils.toString(response.getEntity());
-                LOGGER.debug("Response: {}\nHeaders: {}\nBody: {}", response.getStatusLine().toString(), response.getAllHeaders(), responseBody);
-                if (response.getStatusLine().getStatusCode() != status) {
-                    throw new CommunicationException(response.getStatusLine().toString());
-                }
-
-                return responseBody;
-            }
-        } catch (IOException ex) {
-            throw new CommunicationException(ex);
-        }
-    }
-
     public static String runRequestReturnResponseBody(HttpRequest httpRequest, HttpHost target, CloseableHttpClient client, HttpContext context, int status
     ) throws CommunicationException {
         LOGGER.debug("Running request...");
@@ -151,16 +132,12 @@ public class HTTPHelper {
         return runRequestReturnResponseBody(httpRequest, target, client, context, HttpStatus.SC_OK);
     }
 
-    public static String runRequestReturnResponseBody(HttpRequest httpRequest, HttpHost target, CloseableHttpClient client) throws CommunicationException {
-        return runRequestReturnResponseBody(httpRequest, target, client, HttpStatus.SC_OK);
-    }
-
-    public static boolean runRequestReturnStatus(HttpRequest httpRequest, HttpHost target, CloseableHttpClient client, int status
+    public static boolean runRequestReturnStatus(HttpRequest httpRequest, HttpHost target, CloseableHttpClient client, HttpContext context, int status
     ) throws CommunicationException {
         LOGGER.debug("Running request...");
         try {
             LOGGER.debug("Executing request {} to target {}", httpRequest.getRequestLine(), target);
-            try (CloseableHttpResponse response = client.execute(target, httpRequest)) {
+            try (CloseableHttpResponse response = client.execute(target, httpRequest, context)) {
                 LOGGER.debug("Response: {}\nHeaders: {}", response.getStatusLine().toString(), response.getAllHeaders());
 
                 return response.getStatusLine().getStatusCode() == status;
@@ -170,7 +147,7 @@ public class HTTPHelper {
         }
     }
 
-    public static boolean runRequestReturnStatus(HttpRequest httpRequest, HttpHost target, CloseableHttpClient client) throws CommunicationException {
-        return runRequestReturnStatus(httpRequest, target, client, HttpStatus.SC_OK);
+    public static boolean runRequestReturnStatus(HttpRequest httpRequest, HttpHost target, CloseableHttpClient client, HttpContext context) throws CommunicationException {
+        return runRequestReturnStatus(httpRequest, target, client, context, HttpStatus.SC_OK);
     }
 }
