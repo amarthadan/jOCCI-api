@@ -75,10 +75,15 @@ public class HTTPClient extends Client {
 
     @Override
     public void connect() throws CommunicationException {
-        HTTPAuthentication auth = (HTTPAuthentication) getAuthentication();
-        auth.setTarget(target);
-        auth.setConnection(connection);
-        auth.authenticate();
+        Authentication auth = getAuthentication();
+        if (!(auth instanceof HTTPAuthentication)) {
+            throw new CommunicationException("authentication method '" + auth + "' is not a valid HTTP authentication method");
+        }
+
+        HTTPAuthentication httpAuth = (HTTPAuthentication) auth;
+        httpAuth.setTarget(target);
+        httpAuth.setConnection(connection);
+        httpAuth.authenticate();
 
         setConnected(true);
         obtainModel();
