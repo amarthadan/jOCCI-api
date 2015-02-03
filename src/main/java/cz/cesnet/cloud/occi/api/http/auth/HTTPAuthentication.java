@@ -126,19 +126,18 @@ public abstract class HTTPAuthentication implements Authentication {
                 LOGGER.debug("Response: {}\nHeaders: {}", response.getStatusLine().toString(), response.getAllHeaders());
                 if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
                     Authentication fallback = getFallback();
-                    if (fallback == null) {
+                    if (response.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED && fallback != null) {
+                        if (fallback instanceof KeystoneAuthentication) {
+                            KeystoneAuthentication ka = (KeystoneAuthentication) fallback;
+                            ka.setOriginalResponse(response);
+                            ka.authenticate();
+                        } else {
+                            throw new AuthenticationException("unknown fallback method");
+                        }
+                    } else {
                         throw new AuthenticationException(response.getStatusLine().toString());
                     }
-
-                    if (fallback instanceof KeystoneAuthentication) {
-                        KeystoneAuthentication ka = (KeystoneAuthentication) fallback;
-                        ka.setOriginalResponse(response);
-                        ka.authenticate();
-                    } else {
-                        throw new AuthenticationException("unknown fallback method");
-                    }
                 }
-
             }
         } catch (IOException ex) {
             throw new CommunicationException(ex);
