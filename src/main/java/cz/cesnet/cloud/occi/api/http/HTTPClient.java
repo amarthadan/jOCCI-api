@@ -1,5 +1,6 @@
 package cz.cesnet.cloud.occi.api.http;
 
+import com.sun.net.httpserver.Headers;
 import cz.cesnet.cloud.occi.Collection;
 import cz.cesnet.cloud.occi.Model;
 import cz.cesnet.cloud.occi.api.Authentication;
@@ -16,20 +17,24 @@ import cz.cesnet.cloud.occi.exception.RenderingException;
 import cz.cesnet.cloud.occi.parser.CollectionType;
 import cz.cesnet.cloud.occi.parser.MediaType;
 import cz.cesnet.cloud.occi.parser.TextParser;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
-import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,12 +42,11 @@ public class HTTPClient extends Client {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HTTPClient.class);
     private static final String ACTION_URL_PARAMETER = "?action=";
-    private final MediaType mediaType = MediaType.TEXT_PLAIN;
     private final HTTPConnection connection = new HTTPConnection();
     private HttpHost target;
     private final TextParser parser = new TextParser();
 
-    public HTTPClient(URI endpoint, Authentication authentication, boolean autoconnect) throws CommunicationException {
+    public HTTPClient(URI endpoint, Authentication authentication, String mediaType, boolean autoconnect) throws CommunicationException {
         //to avoid SSL handshake unrecognized_name error
         System.setProperty("jsse.enableSNIExtension", "false");
 
@@ -57,8 +61,8 @@ public class HTTPClient extends Client {
         target = new HttpHost(endpoint.getHost(), endpoint.getPort(), endpoint.getScheme());
         setAuthentication(authentication);
 
-        connection.addHeader(new BasicHeader(HTTP.CONTENT_TYPE, "text/plain"));
-        connection.addHeader(new BasicHeader("Accept", "text/plain"));
+        connection.addHeader(new BasicHeader(HttpHeaders.CONTENT_TYPE, mediaType));
+        connection.addHeader(new BasicHeader(HttpHeaders.ACCEPT, mediaType));
 
         if (autoconnect) {
             connect();
@@ -66,11 +70,11 @@ public class HTTPClient extends Client {
     }
 
     public HTTPClient(URI endpoint, Authentication authentication) throws CommunicationException {
-        this(endpoint, authentication, true);
+        this(endpoint, authentication, MediaType.TEXT_PLAIN, true);
     }
 
     public HTTPClient(URI endpoint) throws CommunicationException {
-        this(endpoint, null, false);
+        this(endpoint, null, MediaType.TEXT_PLAIN, false);
     }
 
     @Override
@@ -95,15 +99,31 @@ public class HTTPClient extends Client {
         }
     }
 
+    private Headers convertHeaders(Header[] apacheHeaders) {
+        Headers javaHeaders = new Headers();
+        for (Header header : apacheHeaders) {
+            javaHeaders.add(header.getName(), header.getValue());
+        }
+
+        return javaHeaders;
+    }
+
     private void obtainModel() throws CommunicationException {
         try {
             LOGGER.debug("Obtaining model...");
             checkConnection();
             HttpGet httpGet = HTTPHelper.prepareGet(Client.MODEL_URI, connection.getHeaders());
-            String modelString = HTTPHelper.runRequestReturnResponseBody(httpGet, target, connection.getClient(), connection.getContext());
-            setModel(parser.parseModel(mediaType, modelString, null));
+            String mediaType;
+            String modelString;
+            Headers headers;
+            try (CloseableHttpResponse response = HTTPHelper.runRequest(httpGet, target, connection.getClient(), connection.getContext())) {
+                mediaType = response.getFirstHeader(HttpHeaders.CONTENT_TYPE).getValue();
+                headers = convertHeaders(response.getAllHeaders());
+                modelString = EntityUtils.toString(response.getEntity());
+            }
+            setModel(parser.parseModel(mediaType, modelString, headers));
             LOGGER.debug("Model: {}", getModel());
-        } catch (ParsingException ex) {
+        } catch (ParsingException | IOException ex) {
             throw new CommunicationException(ex);
         }
     }
@@ -147,11 +167,18 @@ public class HTTPClient extends Client {
     private List<URI> runListGet(HttpGet httpGet) throws CommunicationException {
         try {
             checkConnection();
-            String locationsString = HTTPHelper.runRequestReturnResponseBody(httpGet, target, connection.getClient(), connection.getContext());
-            List<URI> locations = parser.parseLocations(mediaType, locationsString, null);
+            String mediaType;
+            String locationsString;
+            Headers headers;
+            try (CloseableHttpResponse response = HTTPHelper.runRequest(httpGet, target, connection.getClient(), connection.getContext())) {
+                mediaType = response.getFirstHeader(HttpHeaders.CONTENT_TYPE).getValue();
+                headers = convertHeaders(response.getAllHeaders());
+                locationsString = EntityUtils.toString(response.getEntity());
+            }
+            List<URI> locations = parser.parseLocations(mediaType, locationsString, headers);
             LOGGER.debug("Locations: {}", locations);
             return locations;
-        } catch (ParsingException ex) {
+        } catch (ParsingException | IOException ex) {
             throw new CommunicationException(ex);
         }
     }
@@ -238,11 +265,18 @@ public class HTTPClient extends Client {
     private Collection runDescribeGet(HttpGet httpGet, CollectionType type) throws CommunicationException {
         try {
             checkConnection();
-            String entityString = HTTPHelper.runRequestReturnResponseBody(httpGet, target, connection.getClient(), connection.getContext());
-            Collection collection = parser.parseCollection(mediaType, entityString, null, type);
+            String mediaType;
+            String entityString;
+            Headers headers;
+            try (CloseableHttpResponse response = HTTPHelper.runRequest(httpGet, target, connection.getClient(), connection.getContext())) {
+                mediaType = response.getFirstHeader(HttpHeaders.CONTENT_TYPE).getValue();
+                headers = convertHeaders(response.getAllHeaders());
+                entityString = EntityUtils.toString(response.getEntity());
+            }
+            Collection collection = parser.parseCollection(mediaType, entityString, headers, type);
             LOGGER.debug("Collection: {}", collection);
             return collection;
-        } catch (ParsingException ex) {
+        } catch (ParsingException | IOException ex) {
             throw new CommunicationException(ex);
         }
     }
@@ -260,14 +294,21 @@ public class HTTPClient extends Client {
             httpPost.setEntity(httpEntity);
 
             checkConnection();
-            String responseString = HTTPHelper.runRequestReturnResponseBody(httpPost, target, connection.getClient(), connection.getContext(), HttpStatus.SC_CREATED);
+            String mediaType;
+            String responseString;
+            Headers headers;
+            try (CloseableHttpResponse response = HTTPHelper.runRequest(httpPost, target, connection.getClient(), connection.getContext(), HttpStatus.SC_CREATED)) {
+                mediaType = response.getFirstHeader(HttpHeaders.CONTENT_TYPE).getValue();
+                headers = convertHeaders(response.getAllHeaders());
+                responseString = EntityUtils.toString(response.getEntity());
+            }
             List<URI> locations = parser.parseLocations(mediaType, responseString, null);
             if (locations == null || locations.isEmpty()) {
                 throw new CommunicationException("no location returned");
             }
 
             return locations.get(0);
-        } catch (UnsupportedEncodingException | RenderingException | ParsingException ex) {
+        } catch (RenderingException | ParsingException | IOException ex) {
             throw new CommunicationException(ex);
         }
     }
@@ -286,7 +327,7 @@ public class HTTPClient extends Client {
         HttpDelete httpDelete = HTTPHelper.prepareDelete(kind.getLocation(), connection.getHeaders());
 
         checkConnection();
-        return HTTPHelper.runRequestReturnStatus(httpDelete, target, connection.getClient(), connection.getContext());
+        return HTTPHelper.runRequestForStatus(httpDelete, target, connection.getClient(), connection.getContext());
     }
 
     @Override
@@ -301,7 +342,7 @@ public class HTTPClient extends Client {
         }
 
         checkConnection();
-        return HTTPHelper.runRequestReturnStatus(httpDelete, target, connection.getClient(), connection.getContext());
+        return HTTPHelper.runRequestForStatus(httpDelete, target, connection.getClient(), connection.getContext());
     }
 
     @Override
@@ -323,7 +364,7 @@ public class HTTPClient extends Client {
             httpPost.setEntity(httpEntity);
 
             checkConnection();
-            return HTTPHelper.runRequestReturnStatus(httpPost, target, connection.getClient(), connection.getContext());
+            return HTTPHelper.runRequestForStatus(httpPost, target, connection.getClient(), connection.getContext());
         } catch (UnsupportedEncodingException ex) {
             throw new CommunicationException(ex);
         }
@@ -346,7 +387,7 @@ public class HTTPClient extends Client {
             httpPost.setEntity(httpEntity);
 
             checkConnection();
-            return HTTPHelper.runRequestReturnStatus(httpPost, target, connection.getClient(), connection.getContext());
+            return HTTPHelper.runRequestForStatus(httpPost, target, connection.getClient(), connection.getContext());
         } catch (UnsupportedEncodingException ex) {
             throw new CommunicationException(ex);
         }

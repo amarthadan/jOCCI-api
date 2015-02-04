@@ -11,7 +11,7 @@ public class HTTPConnection {
 
     private CloseableHttpClient client = null;
     private HttpContext context = HttpClientContext.create();
-    private final List<Header> headers = new ArrayList<>();
+    private List<Header> headers = new ArrayList<>();
 
     public CloseableHttpClient getClient() {
         return client;
@@ -41,5 +41,9 @@ public class HTTPConnection {
         }
 
         headers.add(header);
+    }
+
+    public void clearHeaders() {
+        headers = new ArrayList<>();
     }
 }

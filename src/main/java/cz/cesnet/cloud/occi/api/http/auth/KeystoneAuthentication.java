@@ -8,12 +8,13 @@ import cz.cesnet.cloud.occi.api.exception.CommunicationException;
 import cz.cesnet.cloud.occi.api.http.HTTPConnection;
 import cz.cesnet.cloud.occi.api.http.HTTPHelper;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.http.Header;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -21,8 +22,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicHeader;
-import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -106,15 +107,23 @@ public class KeystoneAuthentication extends HTTPAuthentication {
             HttpPost httpPost = HTTPHelper.preparePost(path + "/tokens", getHeaders());
             httpPost.setEntity(new StringEntity(getRequestBody(tenant)));
 
-            return HTTPHelper.runRequestReturnResponseBody(httpPost, target, client, context);
-        } catch (UnsupportedEncodingException ex) {
+            try (CloseableHttpResponse response = HTTPHelper.runRequest(httpPost, target, client, context)) {
+                return EntityUtils.toString(response.getEntity());
+            }
+        } catch (IOException ex) {
             throw new CommunicationException(ex);
         }
     }
 
     private String getTenants(HttpHost target, String path, CloseableHttpClient client, HttpContext context) throws CommunicationException {
-        HttpGet httpGet = HTTPHelper.prepareGet(path + "/tenants", getHeaders());
-        return HTTPHelper.runRequestReturnResponseBody(httpGet, target, client, context);
+        try {
+            HttpGet httpGet = HTTPHelper.prepareGet(path + "/tenants", getHeaders());
+            try (CloseableHttpResponse response = HTTPHelper.runRequest(httpGet, target, client, context)) {
+                return EntityUtils.toString(response.getEntity());
+            }
+        } catch (IOException ex) {
+            throw new CommunicationException(ex);
+        }
     }
 
     private void tryTenants(String json, HttpHost target, String path, CloseableHttpClient client, HttpContext context) throws AuthenticationException {
@@ -240,8 +249,8 @@ public class KeystoneAuthentication extends HTTPAuthentication {
             headers = new Header[2];
         }
 
-        headers[0] = new BasicHeader(HTTP.CONTENT_TYPE, "application/json");
-        headers[1] = new BasicHeader("Accept", "application/json");
+        headers[0] = new BasicHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+        headers[1] = new BasicHeader(HttpHeaders.ACCEPT, "application/json");
 
         return headers;
     }
