@@ -27,7 +27,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
-import org.apache.http.HttpStatus;
+import org.apache.http.HttpRequest;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -44,6 +44,9 @@ public class HTTPClient extends Client {
     private static final String ACTION_URL_PARAMETER = "?action=";
     private final HTTPConnection connection = new HTTPConnection();
     private HttpHost target;
+    private String responseMediaType;
+    private String responseBody;
+    private Headers responseHeaders;
     private final TextParser parser = new TextParser();
 
     public HTTPClient(URI endpoint, Authentication authentication, String mediaType, boolean autoconnect) throws CommunicationException {
@@ -108,22 +111,27 @@ public class HTTPClient extends Client {
         return javaHeaders;
     }
 
+    private void runAdnParseRequest(HttpRequest request) throws CommunicationException {
+        try {
+            try (CloseableHttpResponse response = HTTPHelper.runRequest(request, target, connection.getClient(), connection.getContext())) {
+                responseMediaType = response.getFirstHeader(HttpHeaders.CONTENT_TYPE).getValue();
+                responseHeaders = convertHeaders(response.getAllHeaders());
+                responseBody = EntityUtils.toString(response.getEntity());
+            }
+        } catch (IOException ex) {
+            throw new CommunicationException(ex);
+        }
+    }
+
     private void obtainModel() throws CommunicationException {
         try {
             LOGGER.debug("Obtaining model...");
             checkConnection();
             HttpGet httpGet = HTTPHelper.prepareGet(Client.MODEL_URI, connection.getHeaders());
-            String mediaType;
-            String modelString;
-            Headers headers;
-            try (CloseableHttpResponse response = HTTPHelper.runRequest(httpGet, target, connection.getClient(), connection.getContext())) {
-                mediaType = response.getFirstHeader(HttpHeaders.CONTENT_TYPE).getValue();
-                headers = convertHeaders(response.getAllHeaders());
-                modelString = EntityUtils.toString(response.getEntity());
-            }
-            setModel(parser.parseModel(mediaType, modelString, headers));
+            runAdnParseRequest(httpGet);
+            setModel(parser.parseModel(responseMediaType, responseBody, responseHeaders));
             LOGGER.debug("Model: {}", getModel());
-        } catch (ParsingException | IOException ex) {
+        } catch (ParsingException ex) {
             throw new CommunicationException(ex);
         }
     }
@@ -167,18 +175,11 @@ public class HTTPClient extends Client {
     private List<URI> runListGet(HttpGet httpGet) throws CommunicationException {
         try {
             checkConnection();
-            String mediaType;
-            String locationsString;
-            Headers headers;
-            try (CloseableHttpResponse response = HTTPHelper.runRequest(httpGet, target, connection.getClient(), connection.getContext())) {
-                mediaType = response.getFirstHeader(HttpHeaders.CONTENT_TYPE).getValue();
-                headers = convertHeaders(response.getAllHeaders());
-                locationsString = EntityUtils.toString(response.getEntity());
-            }
-            List<URI> locations = parser.parseLocations(mediaType, locationsString, headers);
+            runAdnParseRequest(httpGet);
+            List<URI> locations = parser.parseLocations(responseMediaType, responseBody, responseHeaders);
             LOGGER.debug("Locations: {}", locations);
             return locations;
-        } catch (ParsingException | IOException ex) {
+        } catch (ParsingException ex) {
             throw new CommunicationException(ex);
         }
     }
@@ -265,18 +266,11 @@ public class HTTPClient extends Client {
     private Collection runDescribeGet(HttpGet httpGet, CollectionType type) throws CommunicationException {
         try {
             checkConnection();
-            String mediaType;
-            String entityString;
-            Headers headers;
-            try (CloseableHttpResponse response = HTTPHelper.runRequest(httpGet, target, connection.getClient(), connection.getContext())) {
-                mediaType = response.getFirstHeader(HttpHeaders.CONTENT_TYPE).getValue();
-                headers = convertHeaders(response.getAllHeaders());
-                entityString = EntityUtils.toString(response.getEntity());
-            }
-            Collection collection = parser.parseCollection(mediaType, entityString, headers, type);
+            runAdnParseRequest(httpGet);
+            Collection collection = parser.parseCollection(responseMediaType, responseBody, responseHeaders, type);
             LOGGER.debug("Collection: {}", collection);
             return collection;
-        } catch (ParsingException | IOException ex) {
+        } catch (ParsingException ex) {
             throw new CommunicationException(ex);
         }
     }
@@ -294,21 +288,14 @@ public class HTTPClient extends Client {
             httpPost.setEntity(httpEntity);
 
             checkConnection();
-            String mediaType;
-            String responseString;
-            Headers headers;
-            try (CloseableHttpResponse response = HTTPHelper.runRequest(httpPost, target, connection.getClient(), connection.getContext(), HttpStatus.SC_CREATED)) {
-                mediaType = response.getFirstHeader(HttpHeaders.CONTENT_TYPE).getValue();
-                headers = convertHeaders(response.getAllHeaders());
-                responseString = EntityUtils.toString(response.getEntity());
-            }
-            List<URI> locations = parser.parseLocations(mediaType, responseString, null);
+            runAdnParseRequest(httpPost);
+            List<URI> locations = parser.parseLocations(responseMediaType, responseBody, responseHeaders);
             if (locations == null || locations.isEmpty()) {
                 throw new CommunicationException("no location returned");
             }
 
             return locations.get(0);
-        } catch (RenderingException | ParsingException | IOException ex) {
+        } catch (RenderingException | ParsingException | UnsupportedEncodingException ex) {
             throw new CommunicationException(ex);
         }
     }
