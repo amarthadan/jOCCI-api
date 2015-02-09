@@ -18,6 +18,11 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Class that helps with HTTP requests.
+ *
+ * @author Michal Kimle <kimle.michal@gmail.com>
+ */
 public class HTTPHelper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HTTPHelper.class);

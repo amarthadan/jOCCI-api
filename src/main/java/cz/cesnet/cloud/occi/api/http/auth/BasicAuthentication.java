@@ -10,6 +10,12 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Class representing BASIC HTTP authentication method. This method has a
+ * Keystone authentication method as fallback.
+ *
+ * @author Michal Kimle <kimle.michal@gmail.com>
+ */
 public class BasicAuthentication extends HTTPAuthentication {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicAuthentication.class);

@@ -33,6 +33,13 @@ import org.bouncycastle.openssl.PEMReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Class representing HTTP authentication method via X509 or VOMS certificates.
+ * Supports certificates in pk12 or pem format. This method has a Keystone
+ * authentication method as fallback.
+ *
+ * @author Michal Kimle <kimle.michal@gmail.com>
+ */
 public class X509Authentication extends HTTPAuthentication {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(X509Authentication.class);
@@ -44,6 +51,12 @@ public class X509Authentication extends HTTPAuthentication {
     private String certificate;
     private String password;
 
+    /**
+     * Constructor.
+     *
+     * @param certificate cannot be null nor empty
+     * @param password cannot be null nor empty
+     */
     public X509Authentication(String certificate, String password) {
         if (certificate == null) {
             throw new NullPointerException("certificate cannot be null");

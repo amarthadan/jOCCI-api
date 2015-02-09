@@ -38,6 +38,11 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Class representing HTTP OCCI client.
+ *
+ * @author Michal Kimle <kimle.michal@gmail.com>
+ */
 public class HTTPClient extends Client {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HTTPClient.class);
@@ -49,6 +54,17 @@ public class HTTPClient extends Client {
     private Headers responseHeaders;
     private final TextParser parser = new TextParser();
 
+    /**
+     * Constructor.
+     *
+     * @param endpoint cannot be null
+     * @param authentication authentication method which will be used to
+     * authenticate client against the server
+     * @param mediaType string representing HTTP media type used in
+     * communication
+     * @param autoconnect
+     * @throws CommunicationException
+     */
     public HTTPClient(URI endpoint, Authentication authentication, String mediaType, boolean autoconnect) throws CommunicationException {
         //to avoid SSL handshake unrecognized_name error
         System.setProperty("jsse.enableSNIExtension", "false");
@@ -72,10 +88,23 @@ public class HTTPClient extends Client {
         }
     }
 
+    /**
+     * Constructor.
+     *
+     * @param endpoint cannot be null
+     * @param authentication
+     * @throws CommunicationException
+     */
     public HTTPClient(URI endpoint, Authentication authentication) throws CommunicationException {
         this(endpoint, authentication, MediaType.TEXT_PLAIN, true);
     }
 
+    /**
+     * Constructor.
+     *
+     * @param endpoint cannot be null
+     * @throws CommunicationException
+     */
     public HTTPClient(URI endpoint) throws CommunicationException {
         this(endpoint, null, MediaType.TEXT_PLAIN, false);
     }
@@ -111,7 +140,7 @@ public class HTTPClient extends Client {
         return javaHeaders;
     }
 
-    private void runAdnParseRequest(HttpRequest request) throws CommunicationException {
+    private void runAndParseRequest(HttpRequest request) throws CommunicationException {
         try {
             try (CloseableHttpResponse response = HTTPHelper.runRequest(request, target, connection.getClient(), connection.getContext())) {
                 responseMediaType = response.getFirstHeader(HttpHeaders.CONTENT_TYPE).getValue();
@@ -128,7 +157,7 @@ public class HTTPClient extends Client {
             LOGGER.debug("Obtaining model...");
             checkConnection();
             HttpGet httpGet = HTTPHelper.prepareGet(Client.MODEL_URI, connection.getHeaders());
-            runAdnParseRequest(httpGet);
+            runAndParseRequest(httpGet);
             setModel(parser.parseModel(responseMediaType, responseBody, responseHeaders));
             LOGGER.debug("Model: {}", getModel());
         } catch (ParsingException ex) {
@@ -175,7 +204,7 @@ public class HTTPClient extends Client {
     private List<URI> runListGet(HttpGet httpGet) throws CommunicationException {
         try {
             checkConnection();
-            runAdnParseRequest(httpGet);
+            runAndParseRequest(httpGet);
             List<URI> locations = parser.parseLocations(responseMediaType, responseBody, responseHeaders);
             LOGGER.debug("Locations: {}", locations);
             return locations;
@@ -266,7 +295,7 @@ public class HTTPClient extends Client {
     private Collection runDescribeGet(HttpGet httpGet, CollectionType type) throws CommunicationException {
         try {
             checkConnection();
-            runAdnParseRequest(httpGet);
+            runAndParseRequest(httpGet);
             Collection collection = parser.parseCollection(responseMediaType, responseBody, responseHeaders, type);
             LOGGER.debug("Collection: {}", collection);
             return collection;
@@ -288,7 +317,7 @@ public class HTTPClient extends Client {
             httpPost.setEntity(httpEntity);
 
             checkConnection();
-            runAdnParseRequest(httpPost);
+            runAndParseRequest(httpPost);
             List<URI> locations = parser.parseLocations(responseMediaType, responseBody, responseHeaders);
             if (locations == null || locations.isEmpty()) {
                 throw new CommunicationException("no location returned");

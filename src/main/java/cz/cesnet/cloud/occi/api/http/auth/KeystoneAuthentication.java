@@ -27,6 +27,11 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Class representing OpenStack's Keystone HTTP authentication method.
+ *
+ * @author Michal Kimle <kimle.michal@gmail.com>
+ */
 public class KeystoneAuthentication extends HTTPAuthentication {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KeystoneAuthentication.class);

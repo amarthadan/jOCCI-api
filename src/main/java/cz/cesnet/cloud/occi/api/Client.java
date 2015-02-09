@@ -7,6 +7,11 @@ import cz.cesnet.cloud.occi.core.Entity;
 import java.net.URI;
 import java.util.List;
 
+/**
+ * Abstract class representing an OCCI client.
+ *
+ * @author Michal Kimle <kimle.michal@gmail.com>
+ */
 public abstract class Client {
 
     public static final String MODEL_URI = "/-/";
@@ -52,7 +57,7 @@ public abstract class Client {
      * (URIs).
      *
      * @return resources represented by resource locations (URIs)
-     * @throws cz.cesnet.cloud.occi.api.exception.CommunicationException
+     * @throws CommunicationException
      */
     public abstract List<URI> list() throws CommunicationException;
 
@@ -63,7 +68,7 @@ public abstract class Client {
      * @param resourceType resource type in shortened format (e.g. "compute",
      * "storage", "network")
      * @return resources represented by resource locations (URIs)
-     * @throws cz.cesnet.cloud.occi.api.exception.CommunicationException
+     * @throws CommunicationException
      */
     public abstract List<URI> list(String resourceType) throws CommunicationException;
 
@@ -73,7 +78,7 @@ public abstract class Client {
      *
      * @param resourceIdentifier full resource type identifier
      * @return resources represented by resource locations (URIs)
-     * @throws cz.cesnet.cloud.occi.api.exception.CommunicationException
+     * @throws CommunicationException
      */
     public abstract List<URI> list(URI resourceIdentifier) throws CommunicationException;
 
@@ -81,7 +86,7 @@ public abstract class Client {
      * Retrieves descriptions for all available resources.
      *
      * @return list of resource or link descriptions
-     * @throws cz.cesnet.cloud.occi.api.exception.CommunicationException
+     * @throws CommunicationException
      */
     public abstract List<Entity> describe() throws CommunicationException;
 
@@ -91,7 +96,7 @@ public abstract class Client {
      * @param resourceType resource type in shortened format (e.g. "compute",
      * "storage", "network")
      * @return
-     * @throws cz.cesnet.cloud.occi.api.exception.CommunicationException
+     * @throws CommunicationException
      */
     public abstract List<Entity> describe(String resourceType) throws CommunicationException;
 
@@ -102,7 +107,7 @@ public abstract class Client {
      * @param resourceIdentifier either full resource type identifier or full
      * resource identifier
      * @return
-     * @throws cz.cesnet.cloud.occi.api.exception.CommunicationException
+     * @throws CommunicationException
      */
     public abstract List<Entity> describe(URI resourceIdentifier) throws CommunicationException;
 
@@ -111,7 +116,7 @@ public abstract class Client {
      *
      * @param entity Creates a new resource on the server.
      * @return URI of the new resource
-     * @throws cz.cesnet.cloud.occi.api.exception.CommunicationException
+     * @throws CommunicationException
      */
     public abstract URI create(Entity entity) throws CommunicationException;
 
@@ -121,7 +126,7 @@ public abstract class Client {
      * @param resourceType resource type in shortened format (e.g. "compute",
      * "storage", "network")
      * @return status
-     * @throws cz.cesnet.cloud.occi.api.exception.CommunicationException
+     * @throws CommunicationException
      */
     public abstract boolean delete(String resourceType) throws CommunicationException;
 
@@ -132,7 +137,7 @@ public abstract class Client {
      * @param resourceIdentifier either full resource type identifier or full
      * resource identifier
      * @return status
-     * @throws cz.cesnet.cloud.occi.api.exception.CommunicationException
+     * @throws CommunicationException
      */
     public abstract boolean delete(URI resourceIdentifier) throws CommunicationException;
 
@@ -143,7 +148,7 @@ public abstract class Client {
      * "storage", "network")
      * @param action type of action
      * @return status
-     * @throws cz.cesnet.cloud.occi.api.exception.CommunicationException
+     * @throws CommunicationException
      */
     public abstract boolean trigger(String resourceType, ActionInstance action) throws CommunicationException;
 
@@ -154,7 +159,7 @@ public abstract class Client {
      * resource identifier
      * @param action type of action
      * @return status
-     * @throws cz.cesnet.cloud.occi.api.exception.CommunicationException
+     * @throws CommunicationException
      */
     public abstract boolean trigger(URI resourceIdentifier, ActionInstance action) throws CommunicationException;
 
@@ -163,9 +168,14 @@ public abstract class Client {
      * without creating a new instance or reconnecting. Saves a lot of time in
      * an interactive mode.
      *
-     * @throws cz.cesnet.cloud.occi.api.exception.CommunicationException
+     * @throws CommunicationException
      */
     public abstract void refresh() throws CommunicationException;
 
+    /**
+     * Establishes a connection.
+     *
+     * @throws CommunicationException
+     */
     public abstract void connect() throws CommunicationException;
 }

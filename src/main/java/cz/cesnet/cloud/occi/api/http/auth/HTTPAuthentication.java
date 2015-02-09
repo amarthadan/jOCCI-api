@@ -37,6 +37,13 @@ import org.bouncycastle.openssl.PEMReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Abstract class representing HTTP authentication methods. Lets set either
+ * directory path or file containing CAs and uses them during establishing of
+ * connection.
+ *
+ * @author Michal Kimle <kimle.michal@gmail.com>
+ */
 public abstract class HTTPAuthentication implements Authentication {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HTTPAuthentication.class);
@@ -92,6 +99,12 @@ public abstract class HTTPAuthentication implements Authentication {
     @Override
     public abstract Authentication getFallback();
 
+    /**
+     * Creates a ssl context with custom CAs if set.
+     *
+     * @return ssl context
+     * @throws AuthenticationException
+     */
     protected SSLContext createSSLContext() throws AuthenticationException {
         Security.addProvider(new BouncyCastleProvider());
         KeyStore keyStore = loadCAs();
@@ -142,6 +155,13 @@ public abstract class HTTPAuthentication implements Authentication {
         }
     }
 
+    /**
+     * Loads custom CAs either from file or directory. If both set, CA file has
+     * higher priority.
+     *
+     * @return keystore with custom CAs loaded
+     * @throws AuthenticationException
+     */
     protected KeyStore loadCAs() throws AuthenticationException {
         KeyStore keyStore = null;
         if (CAFile != null && !CAFile.isEmpty()) {

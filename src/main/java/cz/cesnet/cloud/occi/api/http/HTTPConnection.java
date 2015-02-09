@@ -7,6 +7,11 @@ import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.protocol.HttpContext;
 
+/**
+ * Class containing context of HTTP connections.
+ *
+ * @author Michal Kimle <kimle.michal@gmail.com>
+ */
 public class HTTPConnection {
 
     private CloseableHttpClient client = null;
@@ -33,6 +38,12 @@ public class HTTPConnection {
         return headers.toArray(new Header[0]);
     }
 
+    /**
+     * Adds header that will be used in HTTP requests. If connection already
+     * have the header set its value will be replaced.
+     *
+     * @param header
+     */
     public void addHeader(Header header) {
         for (Header h : headers) {
             if (h.getName().equals(header.getName())) {

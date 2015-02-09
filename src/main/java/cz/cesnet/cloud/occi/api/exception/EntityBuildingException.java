@@ -1,5 +1,8 @@
 package cz.cesnet.cloud.occi.api.exception;
 
+/**
+ * @author Michal Kimle <kimle.michal@gmail.com>
+ */
 public class EntityBuildingException extends Exception {
 
     public EntityBuildingException(String message) {

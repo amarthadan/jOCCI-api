@@ -1,5 +1,8 @@
 package cz.cesnet.cloud.occi.api.exception;
 
+/**
+ * @author Michal Kimle <kimle.michal@gmail.com>
+ */
 public class AuthenticationException extends CommunicationException {
 
     public AuthenticationException(String message) {
