@@ -22,7 +22,6 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import javax.net.ssl.SSLContext;
-import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.CredentialsProvider;
@@ -32,7 +31,7 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMReader;
 import org.slf4j.Logger;
@@ -121,9 +120,7 @@ public abstract class HTTPAuthentication implements Authentication {
                     .build();
             connection.setClient(client);
             HttpHead httpHead = HTTPHelper.prepareHead(Client.MODEL_URI, connection.getHeaders());
-            LOGGER.debug("Executing request {} to target {}", httpHead.getRequestLine(), target);
             try (CloseableHttpResponse response = connection.getClient().execute(target, httpHead, connection.getContext())) {
-                LOGGER.debug("Response: {}\nHeaders: {}", response.getStatusLine().toString(), response.getAllHeaders());
                 if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
                     Authentication fallback = getFallback();
                     if (response.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED && fallback != null) {
@@ -135,6 +132,7 @@ public abstract class HTTPAuthentication implements Authentication {
                             throw new AuthenticationException("unknown fallback method");
                         }
                     } else {
+                        LOGGER.error("Response: {}\nHeaders: {}\nBody: {}", response.getStatusLine().toString(), response.getAllHeaders(), EntityUtils.toString(response.getEntity()));
                         throw new AuthenticationException(response.getStatusLine().toString());
                     }
                 }

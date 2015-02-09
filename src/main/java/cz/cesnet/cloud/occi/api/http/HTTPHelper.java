@@ -107,6 +107,7 @@ public class HTTPHelper {
         try {
             CloseableHttpResponse response = client.execute(target, httpRequest, context);
             if (response.getStatusLine().getStatusCode() != status) {
+                LOGGER.error("Response: {}\nHeaders: {}\nBody: {}", response.getStatusLine().toString(), response.getAllHeaders(), EntityUtils.toString(response.getEntity()));
                 throw new CommunicationException(response.getStatusLine().toString());
             }
 
