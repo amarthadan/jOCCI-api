@@ -108,12 +108,14 @@ public abstract class HTTPAuthentication implements Authentication {
     protected SSLContext createSSLContext() throws AuthenticationException {
         Security.addProvider(new BouncyCastleProvider());
         KeyStore keyStore = loadCAs();
-        if (keyStore == null) {
-            return null;
-        }
 
         try {
-            SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(keyStore).build();
+            SSLContext sslContext;
+            if (keyStore == null) {
+                sslContext = SSLContexts.createSystemDefault();
+            } else {
+                sslContext = SSLContexts.custom().loadTrustMaterial(keyStore).build();
+            }
             return sslContext;
         } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException ex) {
             throw new AuthenticationException(ex);

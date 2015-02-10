@@ -27,6 +27,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
+import org.apache.http.HttpMessage;
 import org.apache.http.HttpRequest;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -51,6 +52,7 @@ public class HTTPClient extends Client {
     private HttpHost target;
     private String responseMediaType;
     private String responseBody;
+    private String mediaType;
     private Headers responseHeaders;
     private final TextParser parser = new TextParser();
 
@@ -80,6 +82,7 @@ public class HTTPClient extends Client {
         target = new HttpHost(endpoint.getHost(), endpoint.getPort(), endpoint.getScheme());
         setAuthentication(authentication);
 
+        this.mediaType = mediaType;
         connection.addHeader(new BasicHeader(HttpHeaders.CONTENT_TYPE, mediaType));
         connection.addHeader(new BasicHeader(HttpHeaders.ACCEPT, mediaType));
 
@@ -144,6 +147,9 @@ public class HTTPClient extends Client {
         try {
             try (CloseableHttpResponse response = HTTPHelper.runRequest(request, target, connection.getClient(), connection.getContext())) {
                 responseMediaType = response.getFirstHeader(HttpHeaders.CONTENT_TYPE).getValue();
+                if (responseMediaType.contains(";")) {
+                    responseMediaType = responseMediaType.substring(0, responseMediaType.indexOf(";"));
+                }
                 responseHeaders = convertHeaders(response.getAllHeaders());
                 responseBody = EntityUtils.toString(response.getEntity());
             }
@@ -313,8 +319,20 @@ public class HTTPClient extends Client {
 
         HttpPost httpPost = HTTPHelper.preparePost(kind.getLocation(), connection.getHeaders());
         try {
-            HttpEntity httpEntity = new StringEntity(entity.toText());
-            httpPost.setEntity(httpEntity);
+            switch (mediaType) {
+                case MediaType.TEXT_OCCI: {
+                    Headers headers = entity.toHeaders();
+                    addHeaders(httpPost, headers);
+                }
+                break;
+                case MediaType.TEXT_PLAIN: {
+                    HttpEntity httpEntity = new StringEntity(entity.toText());
+                    httpPost.setEntity(httpEntity);
+                }
+                break;
+                default:
+                    throw new CommunicationException("unsupported media type '" + mediaType + "'");
+            }
 
             checkConnection();
             runAndParseRequest(httpPost);
@@ -375,9 +393,21 @@ public class HTTPClient extends Client {
 
         try {
             String url = kind.getLocation().toString() + ACTION_URL_PARAMETER + action.getAction().getTerm();
-            HttpEntity httpEntity = new StringEntity(action.toText());
             HttpPost httpPost = HTTPHelper.preparePost(url, connection.getHeaders());
-            httpPost.setEntity(httpEntity);
+            switch (mediaType) {
+                case MediaType.TEXT_OCCI: {
+                    Headers headers = action.toHeaders();
+                    addHeaders(httpPost, headers);
+                }
+                break;
+                case MediaType.TEXT_PLAIN: {
+                    HttpEntity httpEntity = new StringEntity(action.toText());
+                    httpPost.setEntity(httpEntity);
+                }
+                break;
+                default:
+                    throw new CommunicationException("unsupported media type '" + mediaType + "'");
+            }
 
             checkConnection();
             return HTTPHelper.runRequestForStatus(httpPost, target, connection.getClient(), connection.getContext());
@@ -419,6 +449,14 @@ public class HTTPClient extends Client {
         }
 
         return uri;
+    }
+
+    private void addHeaders(HttpMessage message, Headers headers) {
+        for (String headerName : headers.keySet()) {
+            for (String value : headers.get(headerName)) {
+                message.addHeader(headerName, value);
+            }
+        }
     }
 
     @Override
