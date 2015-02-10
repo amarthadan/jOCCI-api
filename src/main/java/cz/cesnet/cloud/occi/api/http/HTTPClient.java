@@ -29,6 +29,7 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpMessage;
 import org.apache.http.HttpRequest;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -143,9 +144,9 @@ public class HTTPClient extends Client {
         return javaHeaders;
     }
 
-    private void runAndParseRequest(HttpRequest request) throws CommunicationException {
+    private void runAndParseRequest(HttpRequest request, int status) throws CommunicationException {
         try {
-            try (CloseableHttpResponse response = HTTPHelper.runRequest(request, target, connection.getClient(), connection.getContext())) {
+            try (CloseableHttpResponse response = HTTPHelper.runRequest(request, target, connection.getClient(), connection.getContext(), status)) {
                 responseMediaType = response.getFirstHeader(HttpHeaders.CONTENT_TYPE).getValue();
                 if (responseMediaType.contains(";")) {
                     responseMediaType = responseMediaType.substring(0, responseMediaType.indexOf(";"));
@@ -156,6 +157,10 @@ public class HTTPClient extends Client {
         } catch (IOException ex) {
             throw new CommunicationException(ex);
         }
+    }
+
+    private void runAndParseRequest(HttpRequest request) throws CommunicationException {
+        runAndParseRequest(request, HttpStatus.SC_OK);
     }
 
     private void obtainModel() throws CommunicationException {
@@ -335,7 +340,7 @@ public class HTTPClient extends Client {
             }
 
             checkConnection();
-            runAndParseRequest(httpPost);
+            runAndParseRequest(httpPost, HttpStatus.SC_CREATED);
             List<URI> locations = parser.parseLocations(responseMediaType, responseBody, responseHeaders);
             if (locations == null || locations.isEmpty()) {
                 throw new CommunicationException("no location returned");
