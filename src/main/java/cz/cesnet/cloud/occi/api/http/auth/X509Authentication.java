@@ -179,14 +179,16 @@ public class X509Authentication extends HTTPAuthentication {
             if (!matcher.find()) {
                 throw new AuthenticationException("cannot read certificate key");
             }
-            startIndex = matcher.start(GROUP_WHOLE);
+            //cannot use GROUP_WHOLE descriptor because of Java 7 compatibility
+            startIndex = matcher.start(1);
 
             pattern = Pattern.compile("(?<" + GROUP_WHOLE + ">-----END (?<" + GROUP_TYPE + ">RSA |DSA |EC |DH )*PRIVATE KEY-----)");
             matcher = pattern.matcher(certFileString);
             if (!matcher.find(startIndex)) {
                 throw new AuthenticationException("cannot read certificate key");
             }
-            endIndex = matcher.end(GROUP_WHOLE);
+            //cannot use GROUP_WHOLE descriptor because of Java 7 compatibility
+            endIndex = matcher.end(1);
 
             String key = certFileString.substring(startIndex, endIndex).trim();
             reader = new PEMReader(new InputStreamReader(new ByteArrayInputStream(key.getBytes())));
