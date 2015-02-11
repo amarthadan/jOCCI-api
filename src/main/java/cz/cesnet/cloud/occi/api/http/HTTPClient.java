@@ -35,7 +35,6 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,9 +82,7 @@ public class HTTPClient extends Client {
         target = new HttpHost(endpoint.getHost(), endpoint.getPort(), endpoint.getScheme());
         setAuthentication(authentication);
 
-        this.mediaType = mediaType;
-        connection.addHeader(new BasicHeader(HttpHeaders.CONTENT_TYPE, mediaType));
-        connection.addHeader(new BasicHeader(HttpHeaders.ACCEPT, mediaType));
+        setMediaType(mediaType);
 
         if (autoconnect) {
             connect();
@@ -111,6 +108,11 @@ public class HTTPClient extends Client {
      */
     public HTTPClient(URI endpoint) throws CommunicationException {
         this(endpoint, null, MediaType.TEXT_PLAIN, false);
+    }
+
+    public void setMediaType(String mediaType) {
+        this.mediaType = mediaType;
+        connection.setMediaType(mediaType);
     }
 
     @Override

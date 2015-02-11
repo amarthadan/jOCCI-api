@@ -3,8 +3,10 @@ package cz.cesnet.cloud.occi.api.http;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.http.Header;
+import org.apache.http.HttpHeaders;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HttpContext;
 
 /**
@@ -40,7 +42,7 @@ public class HTTPConnection {
 
     /**
      * Adds header that will be used in HTTP requests. If connection already
-     * have the header set its value will be replaced.
+     * have the header set, its value will be replaced.
      *
      * @param header
      */
@@ -56,5 +58,10 @@ public class HTTPConnection {
 
     public void clearHeaders() {
         headers = new ArrayList<>();
+    }
+
+    public void setMediaType(String mediaType) {
+        addHeader(new BasicHeader(HttpHeaders.CONTENT_TYPE, mediaType));
+        addHeader(new BasicHeader(HttpHeaders.ACCEPT, mediaType));
     }
 }
