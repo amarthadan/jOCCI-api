@@ -14,7 +14,7 @@ Instalation
 
 Usage
 -----
-Detailed documentation is available in project's [Wiki](https://github.com/Misenko/jOCCI-core/wiki).
+Detailed documentation is available in project's [Wiki](https://github.com/Misenko/jOCCI-api/wiki).
 
 ### Continuous integration
 
