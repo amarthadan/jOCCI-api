@@ -115,6 +115,10 @@ public class HTTPClient extends Client {
         connection.setMediaType(mediaType);
     }
 
+    public String getMediaType() {
+        return this.mediaType;
+    }
+
     @Override
     public void connect() throws CommunicationException {
         Authentication auth = getAuthentication();

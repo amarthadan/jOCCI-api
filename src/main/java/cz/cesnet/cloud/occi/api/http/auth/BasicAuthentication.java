@@ -30,10 +30,7 @@ public class BasicAuthentication extends HTTPAuthentication {
         this.authScheme = AuthSchemes.BASIC;
     }
 
-    public BasicAuthentication() {
-    }
-
-    public void setAuthScheme(String authScheme) {
+    protected void setAuthScheme(String authScheme) {
         this.authScheme = authScheme;
     }
 

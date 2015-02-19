@@ -17,9 +17,6 @@ public class DigestAuthentication extends BasicAuthentication {
         setAuthScheme(AuthSchemes.DIGEST);
     }
 
-    public DigestAuthentication() {
-    }
-
     @Override
     public String getIdentifier() {
         return IDENTIFIER;
