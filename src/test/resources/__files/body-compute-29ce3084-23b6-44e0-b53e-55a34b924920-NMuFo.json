@@ -1,0 +1,11 @@
+Category: compute;scheme="http://schemas.ogf.org/occi/infrastructure#";class="kind";location="/compute/";title="compute resource"
+Category: sl6golden;scheme="http://occi.example.org/occi/infrastructure/os_tpl#";class="mixin";location="/mixin/os_tpl/sl6golden/";title="monitoring"
+Category: mammoth;scheme="http://occi.example.org/occi/infrastructure/resource_tpl#";class="mixin";location="/mixin/resource_tpl/mammoth/";title="Mammoth Instance - 8 cores and 32 GB RAM"
+X-OCCI-Attribute: occi.core.id="29ce3084-23b6-44e0-b53e-55a34b924920"
+X-OCCI-Attribute: occi.core.title="fhkgf"
+X-OCCI-Attribute: occi.compute.architecture="x64"
+X-OCCI-Attribute: occi.compute.cores=8
+X-OCCI-Attribute: occi.compute.memory=32
+X-OCCI-Attribute: occi.compute.speed=1
+X-OCCI-Attribute: occi.compute.state="active"
+X-OCCI-Attribute: eu.egi.fedcloud.appdb.uuid="appdb:uuid:sl6golden"

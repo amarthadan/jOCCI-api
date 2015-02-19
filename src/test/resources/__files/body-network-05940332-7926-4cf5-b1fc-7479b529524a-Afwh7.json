@@ -1,0 +1,3 @@
+Category: network;scheme="http://schemas.ogf.org/occi/infrastructure#";class="kind";location="/network/";title="network resource"
+X-OCCI-Attribute: occi.core.id="05940332-7926-4cf5-b1fc-7479b529524a"
+X-OCCI-Attribute: occi.network.state="inactive"

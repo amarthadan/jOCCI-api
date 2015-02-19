@@ -1,0 +1,40 @@
+{
+  "request" : {
+    "url" : "/compute/",
+    "method" : "POST",
+    "headers" : {
+      "Content-Type" : {
+        "equalTo" : "text/occi"
+      },
+      "Accept" : {
+        "equalTo" : "text/occi"
+      },
+      "X-occi-attribute" : {
+        "equalTo" : "occi.core.id=\"5537b49a-bb2e-4302-bf8b-da38611247ca\""
+      },
+      "Category" : {
+        "equalTo" : "compute;scheme=\"http://schemas.ogf.org/occi/infrastructure#\";class=\"kind\";title=\"compute resource\";rel=\"http://schemas.ogf.org/occi/core#resource\";location=\"/compute/\";attributes=\"occi.compute.architecture occi.compute.cores occi.compute.hostname occi.compute.memory occi.compute.speed occi.compute.state{immutable} occi.core.id{required immutable} occi.core.summary occi.core.title\";actions=\"http://schemas.ogf.org/occi/infrastructure/compute/action#restart http://schemas.ogf.org/occi/infrastructure/compute/action#start http://schemas.ogf.org/occi/infrastructure/compute/action#stop http://schemas.ogf.org/occi/infrastructure/compute/action#suspend\""
+      }
+    }
+  },
+  "response" : {
+    "status" : 201,
+    "bodyFileName" : "body-compute-sp6h4.json",
+    "headers" : {
+      "Connection" : "keep-alive",
+      "X-Frame-Options" : "SAMEORIGIN",
+      "X-Xss-Protection" : "1; mode=block",
+      "X-Content-Type-Options" : "nosniff",
+      "Location" : "http://rocci-server-1-1-x.herokuapp.com/compute/5537b49a-bb2e-4302-bf8b-da38611247ca",
+      "Content-Type" : "text/occi; charset=utf-8",
+      "Etag" : "\"e0aa021e21dddbd6d8cecec71e9cf564\"",
+      "Cache-Control" : "max-age=0, private, must-revalidate",
+      "X-Request-Id" : "f852c03f-c126-40cb-a4e1-fcb20014ffb9",
+      "X-Runtime" : "1.462187",
+      "Server" : "WEBrick/1.3.1 (Ruby/2.0.0/2014-09-19)",
+      "Date" : "Thu, 19 Feb 2015 09:06:01 GMT",
+      "Content-Length" : "2",
+      "Via" : "1.1 vegur"
+    }
+  }
+}

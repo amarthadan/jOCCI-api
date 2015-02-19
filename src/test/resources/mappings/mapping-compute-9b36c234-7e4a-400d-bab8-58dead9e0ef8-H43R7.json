@@ -1,0 +1,35 @@
+{
+  "request" : {
+    "url" : "/compute/9b36c234-7e4a-400d-bab8-58dead9e0ef8",
+    "method" : "GET",
+    "headers" : {
+      "Content-Type" : {
+        "equalTo" : "text/occi"
+      },
+      "Accept" : {
+        "equalTo" : "text/occi"
+      }
+    }
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "body-compute-9b36c234-7e4a-400d-bab8-58dead9e0ef8-H43R7.json",
+    "headers" : {
+      "Connection" : "keep-alive",
+      "X-Frame-Options" : "SAMEORIGIN",
+      "X-Xss-Protection" : "1; mode=block",
+      "X-Content-Type-Options" : "nosniff",
+      "Category" : "compute;scheme=\"http://schemas.ogf.org/occi/infrastructure#\";class=\"kind\";location=\"/compute/\";title=\"compute resource\",debian6;scheme=\"http://occi.example.org/occi/infrastructure/os_tpl#\";class=\"mixin\";location=\"/mixin/os_tpl/debian6/\";title=\"debian\",small;scheme=\"http://occi.example.org/occi/infrastructure/resource_tpl#\";class=\"mixin\";location=\"/mixin/resource_tpl/small/\";title=\"Small Instance - 1 core and 2 GB RAM\"",
+      "X-Occi-Attribute" : "occi.core.id=\"9b36c234-7e4a-400d-bab8-58dead9e0ef8\",occi.core.title=\"VMTest\",occi.compute.architecture=\"x86\",occi.compute.cores=1,occi.compute.hostname=\"VMTest\",occi.compute.memory=2,occi.compute.speed=1,occi.compute.state=\"active\"",
+      "Link" : "</network/e36ee51c-bfb6-4264-a5bf-2e71b9145b14>;rel=\"http://schemas.ogf.org/occi/core#link\";self=\"/link/networkinterface/31f185d5-9379-4479-9809-b4cce6bcfdee\";category=\"http://schemas.ogf.org/occi/infrastructure#networkinterface\";occi.core.id=\"31f185d5-9379-4479-9809-b4cce6bcfdee\";occi.core.target=\"/network/e36ee51c-bfb6-4264-a5bf-2e71b9145b14\";occi.core.source=\"/compute/9b36c234-7e4a-400d-bab8-58dead9e0ef8\";occi.networkinterface.interface=\"eth0\";occi.networkinterface.mac=\"00:11:22:33:44:55\";occi.networkinterface.state=\"active\"",
+      "Content-Type" : "text/occi; charset=utf-8",
+      "Cache-Control" : "no-cache",
+      "X-Request-Id" : "8174db1f-b4d5-4823-b085-f4227a21b1f2",
+      "X-Runtime" : "1.078980",
+      "Server" : "WEBrick/1.3.1 (Ruby/2.0.0/2014-09-19)",
+      "Date" : "Thu, 19 Feb 2015 09:05:26 GMT",
+      "Content-Length" : "0",
+      "Via" : "1.1 vegur"
+    }
+  }
+}

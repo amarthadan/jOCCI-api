@@ -1,0 +1,34 @@
+{
+  "request" : {
+    "url" : "/compute/29ce3084-23b6-44e0-b53e-55a34b924920",
+    "method" : "GET",
+    "headers" : {
+      "Content-Type" : {
+        "equalTo" : "text/occi"
+      },
+      "Accept" : {
+        "equalTo" : "text/occi"
+      }
+    }
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "body-compute-29ce3084-23b6-44e0-b53e-55a34b924920-88kQ3.json",
+    "headers" : {
+      "Connection" : "keep-alive",
+      "X-Frame-Options" : "SAMEORIGIN",
+      "X-Xss-Protection" : "1; mode=block",
+      "X-Content-Type-Options" : "nosniff",
+      "Category" : "compute;scheme=\"http://schemas.ogf.org/occi/infrastructure#\";class=\"kind\";location=\"/compute/\";title=\"compute resource\",sl6golden;scheme=\"http://occi.example.org/occi/infrastructure/os_tpl#\";class=\"mixin\";location=\"/mixin/os_tpl/sl6golden/\";title=\"monitoring\",mammoth;scheme=\"http://occi.example.org/occi/infrastructure/resource_tpl#\";class=\"mixin\";location=\"/mixin/resource_tpl/mammoth/\";title=\"Mammoth Instance - 8 cores and 32 GB RAM\"",
+      "X-Occi-Attribute" : "occi.core.id=\"29ce3084-23b6-44e0-b53e-55a34b924920\",occi.core.title=\"fhkgf\",occi.compute.architecture=\"x64\",occi.compute.cores=8,occi.compute.memory=32,occi.compute.speed=1,occi.compute.state=\"active\",eu.egi.fedcloud.appdb.uuid=\"appdb:uuid:sl6golden\"",
+      "Content-Type" : "text/occi; charset=utf-8",
+      "Cache-Control" : "no-cache",
+      "X-Request-Id" : "3dfcfb19-048e-40ec-a1ac-050406ab21fa",
+      "X-Runtime" : "0.696259",
+      "Server" : "WEBrick/1.3.1 (Ruby/2.0.0/2014-09-19)",
+      "Date" : "Thu, 19 Feb 2015 09:05:24 GMT",
+      "Content-Length" : "0",
+      "Via" : "1.1 vegur"
+    }
+  }
+}

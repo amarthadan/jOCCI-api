@@ -1,0 +1,35 @@
+{
+  "request" : {
+    "url" : "/compute/123456789",
+    "method" : "GET",
+    "headers" : {
+      "Content-Type" : {
+        "equalTo" : "text/occi"
+      },
+      "Accept" : {
+        "equalTo" : "text/occi"
+      }
+    }
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "body-compute-123456789-9rQpm.json",
+    "headers" : {
+      "Connection" : "keep-alive",
+      "X-Frame-Options" : "SAMEORIGIN",
+      "X-Xss-Protection" : "1; mode=block",
+      "X-Content-Type-Options" : "nosniff",
+      "Category" : "compute;scheme=\"http://schemas.ogf.org/occi/infrastructure#\";class=\"kind\";location=\"/compute/\";title=\"compute resource\",debian6;scheme=\"http://occi.example.org/occi/infrastructure/os_tpl#\";class=\"mixin\";location=\"/mixin/os_tpl/debian6/\";title=\"debian\",small;scheme=\"http://occi.example.org/occi/infrastructure/resource_tpl#\";class=\"mixin\";location=\"/mixin/resource_tpl/small/\";title=\"Small Instance - 1 core and 2 GB RAM\"",
+      "X-Occi-Attribute" : "occi.core.id=\"123456789\",occi.core.title=\"vm_test01\",occi.compute.architecture=\"x86\",occi.compute.cores=1,occi.compute.hostname=\"vm_test01\",occi.compute.memory=2,occi.compute.speed=1,occi.compute.state=\"active\"",
+      "Link" : "</network/e36ee51c-bfb6-4264-a5bf-2e71b9145b14>;rel=\"http://schemas.ogf.org/occi/core#link\";self=\"/link/networkinterface/9e9aced1-a2a8-459e-8fc8-690beb3f1533\";category=\"http://schemas.ogf.org/occi/infrastructure#networkinterface\";occi.core.id=\"9e9aced1-a2a8-459e-8fc8-690beb3f1533\";occi.core.target=\"/network/e36ee51c-bfb6-4264-a5bf-2e71b9145b14\";occi.core.source=\"/compute/123456789\";occi.networkinterface.interface=\"eth0\";occi.networkinterface.mac=\"00:11:22:33:44:55\";occi.networkinterface.state=\"active\"",
+      "Content-Type" : "text/occi; charset=utf-8",
+      "Cache-Control" : "no-cache",
+      "X-Request-Id" : "131ded70-d45f-4e25-a787-cb20c2cbdb02",
+      "X-Runtime" : "0.471766",
+      "Server" : "WEBrick/1.3.1 (Ruby/2.0.0/2014-09-19)",
+      "Date" : "Thu, 19 Feb 2015 09:05:27 GMT",
+      "Content-Length" : "0",
+      "Via" : "1.1 vegur"
+    }
+  }
+}

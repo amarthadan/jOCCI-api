@@ -1,0 +1,35 @@
+{
+  "request" : {
+    "url" : "/compute/?action=start",
+    "method" : "POST",
+    "headers" : {
+      "Content-Type" : {
+        "equalTo" : "text/occi"
+      },
+      "Accept" : {
+        "equalTo" : "text/occi"
+      },
+      "Category" : {
+        "equalTo" : "start;scheme=\"http://schemas.ogf.org/occi/infrastructure/compute/action#\";class=\"action\";title=\"start compute instance\";"
+      }
+    }
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "body-compute-XyVfC.json",
+    "headers" : {
+      "Connection" : "keep-alive",
+      "X-Frame-Options" : "SAMEORIGIN",
+      "X-Xss-Protection" : "1; mode=block",
+      "X-Content-Type-Options" : "nosniff",
+      "Content-Type" : "text/occi; charset=utf-8",
+      "Cache-Control" : "no-cache",
+      "X-Request-Id" : "485966dc-b448-4503-b638-0d3268d06114",
+      "X-Runtime" : "23.324720",
+      "Server" : "WEBrick/1.3.1 (Ruby/2.0.0/2014-09-19)",
+      "Date" : "Thu, 19 Feb 2015 09:06:27 GMT",
+      "Content-Length" : "0",
+      "Via" : "1.1 vegur"
+    }
+  }
+}

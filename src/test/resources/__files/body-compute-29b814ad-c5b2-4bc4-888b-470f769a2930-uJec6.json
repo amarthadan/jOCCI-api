@@ -1,0 +1,12 @@
+Category: compute;scheme="http://schemas.ogf.org/occi/infrastructure#";class="kind";location="/compute/";title="compute resource"
+Category: debian6;scheme="http://occi.example.org/occi/infrastructure/os_tpl#";class="mixin";location="/mixin/os_tpl/debian6/";title="debian"
+Category: small;scheme="http://occi.example.org/occi/infrastructure/resource_tpl#";class="mixin";location="/mixin/resource_tpl/small/";title="Small Instance - 1 core and 2 GB RAM"
+X-OCCI-Attribute: occi.core.id="29b814ad-c5b2-4bc4-888b-470f769a2930"
+X-OCCI-Attribute: occi.core.title="VMTest2"
+X-OCCI-Attribute: occi.compute.architecture="x86"
+X-OCCI-Attribute: occi.compute.cores=1
+X-OCCI-Attribute: occi.compute.hostname="VMTest2"
+X-OCCI-Attribute: occi.compute.memory=2
+X-OCCI-Attribute: occi.compute.speed=1
+X-OCCI-Attribute: occi.compute.state="active"
+Link: </network/e36ee51c-bfb6-4264-a5bf-2e71b9145b14>;rel="http://schemas.ogf.org/occi/core#link";self="/link/networkinterface/920ad837-1fa3-40a2-8810-fb8f2dc1wrt7";category="http://schemas.ogf.org/occi/infrastructure#networkinterface";occi.core.id="920ad837-1fa3-40a2-8810-fb8f2dc1wrt7";occi.core.target="/network/e36ee51c-bfb6-4264-a5bf-2e71b9145b14";occi.core.source="/compute/29b814ad-c5b2-4bc4-888b-470f769a2930"

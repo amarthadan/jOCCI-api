@@ -1,0 +1,34 @@
+{
+  "request" : {
+    "url" : "/compute/0054b25a-ddb9-412e-869e-7b800a13aa46",
+    "method" : "GET",
+    "headers" : {
+      "Content-Type" : {
+        "equalTo" : "text/occi"
+      },
+      "Accept" : {
+        "equalTo" : "text/occi"
+      }
+    }
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "body-compute-0054b25a-ddb9-412e-869e-7b800a13aa46-BzixR.json",
+    "headers" : {
+      "Connection" : "keep-alive",
+      "X-Frame-Options" : "SAMEORIGIN",
+      "X-Xss-Protection" : "1; mode=block",
+      "X-Content-Type-Options" : "nosniff",
+      "Category" : "compute;scheme=\"http://schemas.ogf.org/occi/infrastructure#\";class=\"kind\";location=\"/compute/\";title=\"compute resource\",debian6;scheme=\"http://occi.example.org/occi/infrastructure/os_tpl#\";class=\"mixin\";location=\"/mixin/os_tpl/debian6/\";title=\"debian\",small;scheme=\"http://occi.example.org/occi/infrastructure/resource_tpl#\";class=\"mixin\";location=\"/mixin/resource_tpl/small/\";title=\"Small Instance - 1 core and 2 GB RAM\"",
+      "X-Occi-Attribute" : "occi.core.id=\"0054b25a-ddb9-412e-869e-7b800a13aa46\",occi.core.title=\"test_title\",occi.compute.architecture=\"x86\",occi.compute.cores=1,occi.compute.memory=2,occi.compute.speed=1,occi.compute.state=\"active\",eu.egi.fedcloud.appdb.uuid=\"appdb:uuid:debian6\"",
+      "Content-Type" : "text/occi; charset=utf-8",
+      "Cache-Control" : "no-cache",
+      "X-Request-Id" : "030003f0-6fb6-47a2-8d1f-a4f2aa75a042",
+      "X-Runtime" : "0.528609",
+      "Server" : "WEBrick/1.3.1 (Ruby/2.0.0/2014-09-19)",
+      "Date" : "Thu, 19 Feb 2015 09:05:23 GMT",
+      "Content-Length" : "0",
+      "Via" : "1.1 vegur"
+    }
+  }
+}

@@ -1,0 +1,3 @@
+Category: storage;scheme="http://schemas.ogf.org/occi/infrastructure#";class="kind";location="/storage/";title="storage resource"
+X-OCCI-Attribute: occi.core.id="a7eeebf0-a93f-4187-bd86-dab2725d5bfa"
+X-OCCI-Attribute: occi.storage.state="offline"

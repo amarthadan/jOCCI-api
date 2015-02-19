@@ -1,0 +1,34 @@
+{
+  "request" : {
+    "url" : "/storage/18ea62b5-da5d-4bd6-9899-0bc7aad30e8f",
+    "method" : "GET",
+    "headers" : {
+      "Content-Type" : {
+        "equalTo" : "text/occi"
+      },
+      "Accept" : {
+        "equalTo" : "text/occi"
+      }
+    }
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "body-storage-18ea62b5-da5d-4bd6-9899-0bc7aad30e8f-b6DVv.json",
+    "headers" : {
+      "Connection" : "keep-alive",
+      "X-Frame-Options" : "SAMEORIGIN",
+      "X-Xss-Protection" : "1; mode=block",
+      "X-Content-Type-Options" : "nosniff",
+      "Category" : "storage;scheme=\"http://schemas.ogf.org/occi/infrastructure#\";class=\"kind\";location=\"/storage/\";title=\"storage resource\"",
+      "X-Occi-Attribute" : "occi.core.id=\"18ea62b5-da5d-4bd6-9899-0bc7aad30e8f\",occi.storage.state=\"offline\"",
+      "Content-Type" : "text/occi; charset=utf-8",
+      "Cache-Control" : "no-cache",
+      "X-Request-Id" : "0089a5e0-f57d-4426-9ef8-e008a4e2f4de",
+      "X-Runtime" : "0.479163",
+      "Server" : "WEBrick/1.3.1 (Ruby/2.0.0/2014-09-19)",
+      "Date" : "Thu, 19 Feb 2015 09:05:36 GMT",
+      "Content-Length" : "0",
+      "Via" : "1.1 vegur"
+    }
+  }
+}

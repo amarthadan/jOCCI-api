@@ -1,0 +1,11 @@
+Category: compute;scheme="http://schemas.ogf.org/occi/infrastructure#";class="kind";location="/compute/";title="compute resource"
+Category: debian6;scheme="http://occi.example.org/occi/infrastructure/os_tpl#";class="mixin";location="/mixin/os_tpl/debian6/";title="debian"
+Category: small;scheme="http://occi.example.org/occi/infrastructure/resource_tpl#";class="mixin";location="/mixin/resource_tpl/small/";title="Small Instance - 1 core and 2 GB RAM"
+X-OCCI-Attribute: occi.core.id="0054b25a-ddb9-412e-869e-7b800a13aa46"
+X-OCCI-Attribute: occi.core.title="test_title"
+X-OCCI-Attribute: occi.compute.architecture="x86"
+X-OCCI-Attribute: occi.compute.cores=1
+X-OCCI-Attribute: occi.compute.memory=2
+X-OCCI-Attribute: occi.compute.speed=1
+X-OCCI-Attribute: occi.compute.state="active"
+X-OCCI-Attribute: eu.egi.fedcloud.appdb.uuid="appdb:uuid:debian6"

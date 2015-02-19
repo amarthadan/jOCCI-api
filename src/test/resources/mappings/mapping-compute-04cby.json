@@ -1,0 +1,36 @@
+{
+  "request" : {
+    "url" : "/compute/",
+    "method" : "POST",
+    "bodyPatterns" : [ {
+      "equalTo" : "Category: compute;scheme=\"http://schemas.ogf.org/occi/infrastructure#\";class=\"kind\";title=\"compute resource\";rel=\"http://schemas.ogf.org/occi/core#resource\";location=\"/compute/\";attributes=\"occi.compute.architecture occi.compute.cores occi.compute.hostname occi.compute.memory occi.compute.speed occi.compute.state{immutable} occi.core.id{required immutable} occi.core.summary occi.core.title\";actions=\"http://schemas.ogf.org/occi/infrastructure/compute/action#restart http://schemas.ogf.org/occi/infrastructure/compute/action#start http://schemas.ogf.org/occi/infrastructure/compute/action#stop http://schemas.ogf.org/occi/infrastructure/compute/action#suspend\"\nCategory: debian6;scheme=\"http://occi.example.org/occi/infrastructure/os_tpl#\";class=\"mixin\";title=\"debian\";rel=\"http://schemas.ogf.org/occi/infrastructure#os_tpl\";location=\"/mixin/os_tpl/debian6/\";attributes=\"eu.egi.fedcloud.appdb.uuid{required immutable}\"\nCategory: small;scheme=\"http://occi.example.org/occi/infrastructure/resource_tpl#\";class=\"mixin\";title=\"Small Instance - 1 core and 2 GB RAM\";rel=\"http://schemas.ogf.org/occi/infrastructure#resource_tpl\";location=\"/mixin/resource_tpl/small/\";attributes=\"occi.compute.architecture occi.compute.cores{immutable} occi.compute.memory{immutable} occi.compute.speed{immutable}\"\nX-OCCI-Attribute: occi.core.id=\"157754bb-af01-40be-853a-6a1f1b5ac500\""
+    } ],
+    "headers" : {
+      "Content-Type" : {
+        "equalTo" : "text/plain"
+      },
+      "Accept" : {
+        "equalTo" : "text/plain"
+      }
+    }
+  },
+  "response" : {
+    "status" : 201,
+    "bodyFileName" : "body-compute-04cby.json",
+    "headers" : {
+      "Connection" : "keep-alive",
+      "X-Frame-Options" : "SAMEORIGIN",
+      "X-Xss-Protection" : "1; mode=block",
+      "X-Content-Type-Options" : "nosniff",
+      "Content-Type" : "text/plain; charset=utf-8",
+      "Etag" : "\"62cb748543771cffda40eefb5da68908\"",
+      "Cache-Control" : "max-age=0, private, must-revalidate",
+      "X-Request-Id" : "00e62bf2-4969-45ad-9066-f0eba14d7c2d",
+      "X-Runtime" : "0.960055",
+      "Server" : "WEBrick/1.3.1 (Ruby/2.0.0/2014-09-19)",
+      "Date" : "Thu, 19 Feb 2015 08:57:54 GMT",
+      "Content-Length" : "104",
+      "Via" : "1.1 vegur"
+    }
+  }
+}

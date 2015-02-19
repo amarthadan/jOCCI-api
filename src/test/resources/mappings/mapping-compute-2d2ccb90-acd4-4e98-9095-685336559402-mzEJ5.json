@@ -1,0 +1,33 @@
+{
+  "request" : {
+    "url" : "/compute/2d2ccb90-acd4-4e98-9095-685336559402",
+    "method" : "GET",
+    "headers" : {
+      "Content-Type" : {
+        "equalTo" : "text/plain"
+      },
+      "Accept" : {
+        "equalTo" : "text/plain"
+      }
+    }
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "body-compute-2d2ccb90-acd4-4e98-9095-685336559402-mzEJ5.json",
+    "headers" : {
+      "Connection" : "keep-alive",
+      "X-Frame-Options" : "SAMEORIGIN",
+      "X-Xss-Protection" : "1; mode=block",
+      "X-Content-Type-Options" : "nosniff",
+      "Content-Type" : "text/plain; charset=utf-8",
+      "Etag" : "\"54293490af78fec8f02c82659398eea4\"",
+      "Cache-Control" : "max-age=0, private, must-revalidate",
+      "X-Request-Id" : "33d44690-ac14-468b-9eea-0d81c6f6af01",
+      "X-Runtime" : "0.466878",
+      "Server" : "WEBrick/1.3.1 (Ruby/2.0.0/2014-09-19)",
+      "Date" : "Thu, 19 Feb 2015 08:57:27 GMT",
+      "Content-Length" : "1265",
+      "Via" : "1.1 vegur"
+    }
+  }
+}

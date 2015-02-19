@@ -147,7 +147,11 @@ public abstract class HTTPAuthentication implements Authentication {
                             throw new AuthenticationException("unknown fallback method");
                         }
                     } else {
-                        LOGGER.error("Response: {}\nHeaders: {}\nBody: {}", response.getStatusLine().toString(), response.getAllHeaders(), EntityUtils.toString(response.getEntity()));
+                        if (response.getEntity() == null) {
+                            LOGGER.error("Response: {}\nHeaders: {}\nBody:\n", response.getStatusLine().toString(), response.getAllHeaders());
+                        } else {
+                            LOGGER.error("Response: {}\nHeaders: {}\nBody: {}", response.getStatusLine().toString(), response.getAllHeaders(), EntityUtils.toString(response.getEntity()));
+                        }
                         throw new AuthenticationException(response.getStatusLine().toString());
                     }
                 }

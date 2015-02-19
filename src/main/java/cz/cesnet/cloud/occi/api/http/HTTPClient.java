@@ -434,10 +434,22 @@ public class HTTPClient extends Client {
             url = resourceIdentifier.toString() + ACTION_URL_PARAMETER + action.getAction().getTerm();
         }
 
+        HttpPost httpPost = HTTPHelper.preparePost(url, connection.getHeaders());
         try {
-            HttpEntity httpEntity = new StringEntity(action.toText());
-            HttpPost httpPost = HTTPHelper.preparePost(url, connection.getHeaders());
-            httpPost.setEntity(httpEntity);
+            switch (mediaType) {
+                case MediaType.TEXT_OCCI: {
+                    Headers headers = action.toHeaders();
+                    addHeaders(httpPost, headers);
+                }
+                break;
+                case MediaType.TEXT_PLAIN: {
+                    HttpEntity httpEntity = new StringEntity(action.toText());
+                    httpPost.setEntity(httpEntity);
+                }
+                break;
+                default:
+                    throw new CommunicationException("unsupported media type '" + mediaType + "'");
+            }
 
             checkConnection();
             return HTTPHelper.runRequestForStatus(httpPost, target, connection.getClient(), connection.getContext());
