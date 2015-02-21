@@ -1,6 +1,6 @@
 {
   "request" : {
-    "url" : "/compute/13b9729c-e970-4a72-a661-4450b0949f40?action=start",
+    "url" : "/compute/29b814ad-c5b2-4bc4-888b-470f769a2930?action=start",
     "method" : "POST",
     "bodyPatterns" : [ {
       "equalTo" : "Category: start;scheme=\"http://schemas.ogf.org/occi/infrastructure/compute/action#\";class=\"action\";title=\"start compute instance\";"
@@ -16,7 +16,7 @@
   },
   "response" : {
     "status" : 200,
-    "bodyFileName" : "body-compute-13b9729c-e970-4a72-a661-4450b0949f40-5oA1q.json",
+    "bodyFileName" : "body-compute-29b814ad-c5b2-4bc4-888b-470f769a2930-5oA1q.json",
     "headers" : {
       "Connection" : "keep-alive",
       "X-Frame-Options" : "SAMEORIGIN",

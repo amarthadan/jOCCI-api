@@ -1,6 +1,6 @@
 {
   "request" : {
-    "url" : "/network/9003401f-da74-4a34-aef3-349b02bd144f",
+    "url" : "/network/24b94558-c46a-41e3-981d-16600f71cddb",
     "method" : "GET",
     "headers" : {
       "Content-Type" : {
@@ -13,14 +13,14 @@
   },
   "response" : {
     "status" : 200,
-    "bodyFileName" : "body-network-9003401f-da74-4a34-aef3-349b02bd144f-61PLg.json",
+    "bodyFileName" : "body-network-24b94558-c46a-41e3-981d-16600f71cddb-61PLg.json",
     "headers" : {
       "Connection" : "keep-alive",
       "X-Frame-Options" : "SAMEORIGIN",
       "X-Xss-Protection" : "1; mode=block",
       "X-Content-Type-Options" : "nosniff",
       "Category" : "network;scheme=\"http://schemas.ogf.org/occi/infrastructure#\";class=\"kind\";location=\"/network/\";title=\"network resource\"",
-      "X-Occi-Attribute" : "occi.core.id=\"9003401f-da74-4a34-aef3-349b02bd144f\",occi.network.state=\"inactive\"",
+      "X-Occi-Attribute" : "occi.core.id=\"24b94558-c46a-41e3-981d-16600f71cddb\",occi.network.state=\"inactive\"",
       "Content-Type" : "text/occi; charset=utf-8",
       "Cache-Control" : "no-cache",
       "X-Request-Id" : "235dab6c-3c1a-4f0c-ad68-44665b9e85a2",

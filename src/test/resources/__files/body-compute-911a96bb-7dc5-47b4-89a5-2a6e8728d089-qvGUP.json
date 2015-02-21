@@ -1,3 +1,0 @@
-Category: compute;scheme="http://schemas.ogf.org/occi/infrastructure#";class="kind";location="/compute/";title="compute resource"
-X-OCCI-Attribute: occi.core.id="911a96bb-7dc5-47b4-89a5-2a6e8728d089"
-X-OCCI-Attribute: occi.compute.state="active"

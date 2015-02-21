@@ -1,6 +1,6 @@
 {
   "request" : {
-    "url" : "/storage/eec78431-f648-4077-b28e-4d2b6542f291",
+    "url" : "/storage/a7eeebf0-a93f-4187-bd86-dab2725d5bfa",
     "method" : "GET",
     "headers" : {
       "Content-Type" : {
@@ -13,14 +13,14 @@
   },
   "response" : {
     "status" : 200,
-    "bodyFileName" : "body-storage-eec78431-f648-4077-b28e-4d2b6542f291-M22T3.json",
+    "bodyFileName" : "body-storage-a7eeebf0-a93f-4187-bd86-dab2725d5bfa-M22T3.json",
     "headers" : {
       "Connection" : "keep-alive",
       "X-Frame-Options" : "SAMEORIGIN",
       "X-Xss-Protection" : "1; mode=block",
       "X-Content-Type-Options" : "nosniff",
       "Category" : "storage;scheme=\"http://schemas.ogf.org/occi/infrastructure#\";class=\"kind\";location=\"/storage/\";title=\"storage resource\"",
-      "X-Occi-Attribute" : "occi.core.id=\"eec78431-f648-4077-b28e-4d2b6542f291\",occi.storage.state=\"offline\"",
+      "X-Occi-Attribute" : "occi.core.id=\"a7eeebf0-a93f-4187-bd86-dab2725d5bfa\",occi.storage.state=\"offline\"",
       "Content-Type" : "text/occi; charset=utf-8",
       "Cache-Control" : "no-cache",
       "X-Request-Id" : "c1b3d5a2-a257-4fd8-9197-e00e7584f75e",
