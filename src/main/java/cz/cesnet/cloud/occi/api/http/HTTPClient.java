@@ -59,6 +59,25 @@ public class HTTPClient extends Client {
     /**
      * Constructor.
      *
+     * <p>
+     * HTTPClient has three constructors via which one can set remote server's
+     * endpoint, authentication method, media type for HTTP messages and whether
+     * client should automatically connect to the server or not.</p>
+     *
+     * <p>
+     * By default text/plain is used as media type and client is initialized
+     * without authentication method. Client automatically connects to the
+     * remote server by default when authentication method is set.</p>
+     *
+     * <p>
+     * Examples:</p>
+     *
+     * <pre>{@code
+     * Client client = new HTTPClient(URI.create("https://remote.server.net")); client.connect();}</pre>
+     *
+     * <pre>{@code
+     * Client client = new HTTPClient(URI.create("https://remote.server.net"), new BasicAuthentication("username", "password"), MediaType.TEXT_OCCI, true);}</pre>
+     *
      * @param endpoint cannot be null
      * @param authentication authentication method which will be used to
      * authenticate client against the server

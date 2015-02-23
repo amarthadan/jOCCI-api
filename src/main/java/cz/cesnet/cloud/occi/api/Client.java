@@ -53,8 +53,15 @@ public abstract class Client {
     }
 
     /**
+     * <p>
      * Retrieves all available resources represented by resource locations
-     * (URIs).
+     * (URIs).</p>
+     *
+     * <p>
+     * Example:</p>
+     *
+     * <pre>{@code
+     * List<URI> list = client.list();}</pre>
      *
      * @return resources represented by resource locations (URIs)
      * @throws CommunicationException
@@ -64,6 +71,12 @@ public abstract class Client {
     /**
      * Retrieves available resources of a certain type represented by resource
      * locations (URIs).
+     *
+     * <p>
+     * Example:</p>
+     *
+     * <pre>{@code
+     * List<URI> list = client.list("compute");}</pre>
      *
      * @param resourceType resource type in shortened format (e.g. "compute",
      * "storage", "network")
@@ -76,6 +89,12 @@ public abstract class Client {
      * Retrieves available resources of a certain type represented by resource
      * locations (URIs).
      *
+     * <p>
+     * Example:</p>
+     *
+     * <pre>{@code
+     * List<URI> list = client.list(URI.create("http://schemas.ogf.org/occi/infrastructure#network"));}</pre>
+     *
      * @param resourceIdentifier full resource type identifier
      * @return resources represented by resource locations (URIs)
      * @throws CommunicationException
@@ -85,6 +104,12 @@ public abstract class Client {
     /**
      * Retrieves descriptions for all available resources.
      *
+     * <p>
+     * Example:</p>
+     *
+     * <pre>{@code
+     * List<Entity> list = client.describe();}</pre>
+     *
      * @return list of resource or link descriptions
      * @throws CommunicationException
      */
@@ -93,9 +118,15 @@ public abstract class Client {
     /**
      * Retrieves descriptions for available resources of a certain type.
      *
+     * <p>
+     * Example:</p>
+     *
+     * <pre>{@code
+     * List<Entity> list = client.describe("compute");}</pre>
+     *
      * @param resourceType resource type in shortened format (e.g. "compute",
      * "storage", "network")
-     * @return
+     * @return list of resource or link descriptions
      * @throws CommunicationException
      */
     public abstract List<Entity> describe(String resourceType) throws CommunicationException;
@@ -104,15 +135,35 @@ public abstract class Client {
      * Retrieves descriptions for available resources specified by a type
      * identifier or resource identifier.
      *
+     * <p>
+     * Example:</p>
+     *
+     * <pre>{@code
+     * List<Entity> list = client.describe(URI.create("http://schemas.ogf.org/occi/infrastructure#network"));
+     *...
+     *list = client.describe(URI.create("https://remote.server.net/storage/123"));}</pre>
+     *
      * @param resourceIdentifier either full resource type identifier or full
      * resource identifier
-     * @return
+     * @return list of resource or link descriptions
      * @throws CommunicationException
      */
     public abstract List<Entity> describe(URI resourceIdentifier) throws CommunicationException;
 
     /**
      * Creates a new resource on the server.
+     *
+     * <p>
+     * Example:</p>
+     *
+     * <pre>{@code
+     * Model model = client.getModel();
+     *EntityBuilder entityBuilder = new EntityBuilder(model);
+     *Resource resource = entityBuilder.getResource("compute");
+     *resource.addMixin(model.findMixin("debian7", "os_tpl"));
+     *resource.addMixin(model.findMixin("small", "resource_tpl"));
+     *resource.addAttribute(Compute.MEMORY_ATTRIBUTE_NAME, "2048");
+     *URI location = client.create(resource);}</pre>
      *
      * @param entity Creates a new resource on the server.
      * @return URI of the new resource
@@ -122,6 +173,12 @@ public abstract class Client {
 
     /**
      * Deletes all resource of a certain resource type from the server.
+     *
+     * <p>
+     * Example:</p>
+     *
+     * <pre>{@code
+     * boolean wasSuccessful = client.delete("compute");}</pre>
      *
      * @param resourceType resource type in shortened format (e.g. "compute",
      * "storage", "network")
@@ -134,6 +191,14 @@ public abstract class Client {
      * Deletes all resource of a certain resource type or specific resource from
      * the server.
      *
+     * <p>
+     * Example:</p>
+     *
+     * <pre>{@code
+     * boolean wasSuccessful = client.delete(URI.create("http://schemas.ogf.org/occi/infrastructure#network"));
+     *...
+     *wasSuccessful = client.delete(URI.create("https://remote.server.net/storage/123"));}</pre>
+     *
      * @param resourceIdentifier either full resource type identifier or full
      * resource identifier
      * @return status
@@ -143,6 +208,15 @@ public abstract class Client {
 
     /**
      * Triggers given action on a specified set of resources.
+     *
+     * <p>
+     * Example:</p>
+     *
+     * <pre>{@code
+     * Model model = client.getModel();
+     *EntityBuilder entityBuilder = new EntityBuilder(model);
+     *ActionInstance actionInstance = entityBuilder.getActionInstance("start");
+     *boolean wasSuccessful = client.trigger("compute", actionInstance);}</pre>
      *
      * @param resourceType resource type in shortened format (e.g. "compute",
      * "storage", "network")
@@ -154,6 +228,17 @@ public abstract class Client {
 
     /**
      * Triggers given action on a set of resources or on a specified resource.
+     *
+     * <p>
+     * Example:</p>
+     *
+     * <pre>{@code
+     * Model model = client.getModel();
+     *EntityBuilder entityBuilder = new EntityBuilder(model);
+     *ActionInstance actionInstance = entityBuilder.getActionInstance("start");
+     *boolean wasSuccessful = client.trigger(URI.create("http://schemas.ogf.org/occi/infrastructure#network"), actionInstance);
+     *...
+     *wasSuccessful = client.trigger(URI.create("https://remote.server.net/compute/456"), actionInstance);}</pre>
      *
      * @param resourceIdentifier either full resource type identifier or full
      * resource identifier

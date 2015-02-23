@@ -35,8 +35,18 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Class representing HTTP authentication method via X509 or VOMS certificates.
+ *
+ * <p>
  * Supports certificates in pk12 or pem format. This method has a Keystone
- * authentication method as fallback.
+ * authentication method as fallback.</p>
+ *
+ * <p>
+ * Example:</p>
+ *
+ * <pre>{@code
+ * HTTPAuthentication auth = new X509Authentication("/path/to/certificate.pem", "password");
+ *auth.setCAPath("/etc/grid-security/certificates/"); //path to CA directory
+ *Client client = new HTTPClient(URI.create("https://remote.server.net"), auth);}</pre>
  *
  * @author Michal Kimle <kimle.michal@gmail.com>
  */
