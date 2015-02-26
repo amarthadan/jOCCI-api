@@ -60,6 +60,9 @@ public class AdvancedUsageExample {
             }
 
             Resource compute = eb.getResource("compute");
+            Mixin mixin = mixins.get(0);
+            System.out.println("Mixin:");
+            System.out.println(mixin.toText());
             compute.addMixin(mixins.get(0));
             compute.addAttribute(Compute.ARCHITECTURE_ATTRIBUTE_NAME, "x86");
             compute.addAttribute(Compute.CORES_ATTRIBUTE_NAME, "2");
@@ -82,12 +85,13 @@ public class AdvancedUsageExample {
                     break;
                 }
                 System.out.println(".");
+                Thread.sleep(5000);
             }
 
             //triggering action
-            System.out.println("Stopping all computes...");
-            ActionInstance actionInstance = eb.getActionInstance(URI.create("http://schemas.ogf.org/occi/infrastructure/compute/action#stop"));
-            boolean status = client.trigger("compute", actionInstance);
+            System.out.println("Starting previously created compute...");
+            ActionInstance actionInstance = eb.getActionInstance(URI.create("http://schemas.ogf.org/occi/infrastructure/compute/action#start"));
+            boolean status = client.trigger(location, actionInstance);
             if (status) {
                 System.out.println("Triggered: OK");
             } else {
@@ -95,14 +99,15 @@ public class AdvancedUsageExample {
             }
 
             //deleting resource
-            System.out.println("Deleting previously created resource...");
+            System.out.println("Deleting previously created compute...");
             status = client.delete(list.get(0));
             if (status) {
                 System.out.println("Deleted: OK");
             } else {
                 System.out.println("Deleted: FAIL");
             }
-        } catch (CommunicationException | AmbiguousIdentifierException | EntityBuildingException | InvalidAttributeValueException | RenderingException ex) {
+        } catch (CommunicationException | AmbiguousIdentifierException | EntityBuildingException |
+                InvalidAttributeValueException | RenderingException | InterruptedException ex) {
             throw new RuntimeException(ex);
         }
     }
