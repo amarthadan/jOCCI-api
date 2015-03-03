@@ -88,10 +88,21 @@ public class AdvancedUsageExample {
                 Thread.sleep(5000);
             }
 
-            //triggering action
-            System.out.println("Starting previously created compute...");
-            ActionInstance actionInstance = eb.getActionInstance(URI.create("http://schemas.ogf.org/occi/infrastructure/compute/action#start"));
+            //triggering actions
+            //stopping compute
+            System.out.println("Stopping previously created compute...");
+            ActionInstance actionInstance = eb.getActionInstance(URI.create("http://schemas.ogf.org/occi/infrastructure/compute/action#stop"));
             boolean status = client.trigger(location, actionInstance);
+            if (status) {
+                System.out.println("Triggered: OK");
+            } else {
+                System.out.println("Triggered: FAIL");
+            }
+
+            //starting compute
+            System.out.println("Starting previously created compute...");
+            actionInstance = eb.getActionInstance(URI.create("http://schemas.ogf.org/occi/infrastructure/compute/action#start"));
+            status = client.trigger(location, actionInstance);
             if (status) {
                 System.out.println("Triggered: OK");
             } else {
@@ -100,7 +111,7 @@ public class AdvancedUsageExample {
 
             //deleting resource
             System.out.println("Deleting previously created compute...");
-            status = client.delete(list.get(0));
+            status = client.delete(location);
             if (status) {
                 System.out.println("Deleted: OK");
             } else {

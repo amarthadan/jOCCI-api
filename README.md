@@ -10,7 +10,14 @@ Requirements
 
 Instalation
 -----------
-**For now, the only way to use jOCCI-api is to clone the repository and add it to your Java project manually. In this case [jOCCI-core](https://github.com/Misenko/jOCCI-core) has to be added to the project as well. Distribution via Maven will be added soon.**
+Using Maven:
+```xml
+<dependency>
+    <groupId>cz.cesnet.cloud</groupId>
+    <artifactId>jocci-api</artifactId>
+    <version>0.1.0</version>
+</dependency>
+```
 
 Usage
 -----
