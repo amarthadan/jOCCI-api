@@ -53,10 +53,20 @@ public abstract class HTTPAuthentication implements Authentication {
     private String CAPath;
     private String CAFile;
 
+    /**
+     * Returns server that authentication is run against.
+     *
+     * @return
+     */
     public HttpHost getTarget() {
         return target;
     }
 
+    /**
+     * Sets server to run authentication against.
+     *
+     * @param target server
+     */
     public void setTarget(HttpHost target) {
         this.target = target;
     }
@@ -77,18 +87,38 @@ public abstract class HTTPAuthentication implements Authentication {
         this.credentialsProvider = credentialsProvider;
     }
 
+    /**
+     * Returns path to the custom CA directory.
+     *
+     * @return path to the custom CA directory
+     */
     public String getCAPath() {
         return CAPath;
     }
 
+    /**
+     * Sets path to custom CA directory.
+     *
+     * @param CAPath path to custom CA directory
+     */
     public void setCAPath(String CAPath) {
         this.CAPath = CAPath;
     }
 
+    /**
+     * Returns path to custom CA file.
+     *
+     * @return path to custom CA file
+     */
     public String getCAFile() {
         return CAFile;
     }
 
+    /**
+     * Sets path to custom CA file
+     *
+     * @param CAFile path to custom CA file
+     */
     public void setCAFile(String CAFile) {
         this.CAFile = CAFile;
     }

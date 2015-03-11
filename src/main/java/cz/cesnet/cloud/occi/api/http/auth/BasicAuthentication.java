@@ -44,18 +44,38 @@ public class BasicAuthentication extends HTTPAuthentication {
         this.authScheme = authScheme;
     }
 
+    /**
+     * Returns username.
+     *
+     * @return username
+     */
     public String getUsername() {
         return username;
     }
 
+    /**
+     * Sets username.
+     *
+     * @param username username
+     */
     public void setUsername(String username) {
         this.username = username;
     }
 
+    /**
+     * Returns password.
+     *
+     * @return password
+     */
     public String getPassword() {
         return password;
     }
 
+    /**
+     * Sets password
+     *
+     * @param password password
+     */
     public void setPassword(String password) {
         this.password = password;
     }

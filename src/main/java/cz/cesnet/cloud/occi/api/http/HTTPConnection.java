@@ -56,10 +56,18 @@ public class HTTPConnection {
         headers.add(header);
     }
 
+    /**
+     * Removes all headers from connection.
+     */
     public void clearHeaders() {
         headers = new ArrayList<>();
     }
 
+    /**
+     * Sets headers 'Content-type' and 'Accept' to given media type.
+     *
+     * @param mediaType media type
+     */
     public void setMediaType(String mediaType) {
         addHeader(new BasicHeader(HttpHeaders.CONTENT_TYPE, mediaType));
         addHeader(new BasicHeader(HttpHeaders.ACCEPT, mediaType));
