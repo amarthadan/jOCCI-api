@@ -26,7 +26,8 @@ public interface Authentication {
     /**
      * Runs the authentication.
      *
-     * @throws CommunicationException
+     * @throws CommunicationException when error occures during the
+     * communication
      */
     void authenticate() throws CommunicationException;
 }

@@ -184,10 +184,20 @@ public class EntityBuilder {
         return ai;
     }
 
+    /**
+     * Returns model.
+     *
+     * @return model
+     */
     public Model getModel() {
         return model;
     }
 
+    /**
+     * Sets model.
+     *
+     * @param model model
+     */
     public void setModel(Model model) {
         this.model = model;
     }

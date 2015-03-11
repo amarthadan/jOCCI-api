@@ -129,15 +129,28 @@ public class HTTPClient extends Client {
         this(endpoint, null, MediaType.TEXT_PLAIN, false);
     }
 
+    /**
+     * Sets media type for the connection.
+     *
+     * @param mediaType media type
+     */
     public void setMediaType(String mediaType) {
         this.mediaType = mediaType;
         connection.setMediaType(mediaType);
     }
 
+    /**
+     * Returns media type of the connection.
+     *
+     * @return media type
+     */
     public String getMediaType() {
         return this.mediaType;
     }
 
+    /**
+     * @see Client#connect()
+     */
     @Override
     public void connect() throws CommunicationException {
         Authentication auth = getAuthentication();
@@ -201,11 +214,17 @@ public class HTTPClient extends Client {
         }
     }
 
+    /**
+     * @see Client#list()
+     */
     @Override
     public List<URI> list() throws CommunicationException {
         return list("");
     }
 
+    /**
+     * @see Client#list(java.lang.String)
+     */
     @Override
     public List<URI> list(String resourceType) throws CommunicationException {
         HttpGet httpGet;
@@ -227,6 +246,9 @@ public class HTTPClient extends Client {
         return runListGet(httpGet);
     }
 
+    /**
+     * @see Client#list(java.net.URI)
+     */
     @Override
     public List<URI> list(URI resourceIdentifier) throws CommunicationException {
         Kind kind = getModel().findKind(resourceIdentifier);
@@ -249,6 +271,9 @@ public class HTTPClient extends Client {
         }
     }
 
+    /**
+     * @see Client#describe()
+     */
     @Override
     public List<Entity> describe() throws CommunicationException {
         List<URI> locations = list();
@@ -260,6 +285,9 @@ public class HTTPClient extends Client {
         return generateEntityListFromCollection(collection);
     }
 
+    /**
+     * @see Client#describe(java.lang.String)
+     */
     @Override
     public List<Entity> describe(String resourceType) throws CommunicationException {
         Model model = getModel();
@@ -279,6 +307,9 @@ public class HTTPClient extends Client {
         }
     }
 
+    /**
+     * @see Client#describe(java.net.URI)
+     */
     @Override
     public List<Entity> describe(URI resourceIdentifier) throws CommunicationException {
         Model model = getModel();
@@ -340,6 +371,9 @@ public class HTTPClient extends Client {
         }
     }
 
+    /**
+     * @see Client#create(cz.cesnet.cloud.occi.core.Entity)
+     */
     @Override
     public URI create(Entity entity) throws CommunicationException {
         Kind kind = entity.getKind();
@@ -377,6 +411,9 @@ public class HTTPClient extends Client {
         }
     }
 
+    /**
+     * @see Client#delete(java.lang.String)
+     */
     @Override
     public boolean delete(String resourceType) throws CommunicationException {
         Kind kind;
@@ -394,6 +431,9 @@ public class HTTPClient extends Client {
         return HTTPHelper.runRequestForStatus(httpDelete, target, connection.getClient(), connection.getContext());
     }
 
+    /**
+     * @see Client#delete(java.net.URI)
+     */
     @Override
     public boolean delete(URI resourceIdentifier) throws CommunicationException {
         Kind kind = getModel().findKind(resourceIdentifier);
@@ -409,6 +449,10 @@ public class HTTPClient extends Client {
         return HTTPHelper.runRequestForStatus(httpDelete, target, connection.getClient(), connection.getContext());
     }
 
+    /**
+     * @see Client#trigger(java.lang.String,
+     * cz.cesnet.cloud.occi.core.ActionInstance)
+     */
     @Override
     public boolean trigger(String resourceType, ActionInstance action) throws CommunicationException {
         Kind kind;
@@ -446,6 +490,10 @@ public class HTTPClient extends Client {
         }
     }
 
+    /**
+     * @see Client#trigger(java.net.URI,
+     * cz.cesnet.cloud.occi.core.ActionInstance)
+     */
     @Override
     public boolean trigger(URI resourceIdentifier, ActionInstance action) throws CommunicationException {
         Kind kind = getModel().findKind(resourceIdentifier);
@@ -501,6 +549,9 @@ public class HTTPClient extends Client {
         }
     }
 
+    /**
+     * @see Client#refresh()
+     */
     @Override
     public void refresh() throws CommunicationException {
         obtainModel();

@@ -85,10 +85,20 @@ public class X509Authentication extends HTTPAuthentication {
         this.password = password;
     }
 
+    /**
+     * Returns user's certificate.
+     *
+     * @return user's certificate
+     */
     public String getCertificate() {
         return certificate;
     }
 
+    /**
+     * Sets user's certificate.
+     *
+     * @param certificate user's certificate
+     */
     public void setCertificate(String certificate) {
         if (certificate == null) {
             throw new NullPointerException("certificate cannot be null");
@@ -100,10 +110,20 @@ public class X509Authentication extends HTTPAuthentication {
         this.certificate = certificate;
     }
 
+    /**
+     * Returns user's password.
+     *
+     * @return user's password
+     */
     public String getPassword() {
         return password;
     }
 
+    /**
+     * Sets user's password.
+     *
+     * @param password user's password
+     */
     public void setPassword(String password) {
         if (password == null) {
             throw new NullPointerException("password cannot be null");

@@ -1,7 +1,7 @@
 jOCCI-api - A Java OCCI Framework
 ==================================
 
-[![Build Status](https://secure.travis-ci.org/Misenko/jOCCI-api.png)](http://travis-ci.org/Misenko/jOCCI-api)
+[![Build Status](https://secure.travis-ci.org/EGI-FCTF/jOCCI-api.png)](http://travis-ci.org/EGI-FCTF/jOCCI-api)
 
 Requirements
 ------------
@@ -15,17 +15,17 @@ Using Maven:
 <dependency>
     <groupId>cz.cesnet.cloud</groupId>
     <artifactId>jocci-api</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
 </dependency>
 ```
 
 Usage
 -----
-Detailed documentation is available in project's [Wiki](https://github.com/Misenko/jOCCI-api/wiki).
+Detailed documentation is available in project's [Wiki](https://github.com/EGI-FCTF/jOCCI-api/wiki).
 
 ### Continuous integration
 
-[Continuous integration for jOCCI by Travis-CI](http://travis-ci.org/Misenko/jOCCI-api/)
+[Continuous integration for jOCCI by Travis-CI](http://travis-ci.org/EGI-FCTF/jOCCI-api/)
 
 ### Contribute
 

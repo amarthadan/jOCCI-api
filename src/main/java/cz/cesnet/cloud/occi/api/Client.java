@@ -20,34 +20,74 @@ public abstract class Client {
     private boolean connected;
     private Authentication authentication;
 
+    /**
+     * Returns client's endpoint.
+     *
+     * @return client's endpoint
+     */
     public URI getEndpoint() {
         return endpoint;
     }
 
+    /**
+     * Sets client's endpoint.
+     *
+     * @param endpoint client's endpoint
+     */
     public void setEndpoint(URI endpoint) {
         this.endpoint = endpoint.normalize();
     }
 
+    /**
+     * Returns model.
+     *
+     * @return model
+     */
     public Model getModel() {
         return model;
     }
 
+    /**
+     * Sets model.
+     *
+     * @param model model
+     */
     public void setModel(Model model) {
         this.model = model;
     }
 
+    /**
+     * Checks whether client is connected.
+     *
+     * @return true if client is connected false otherwise
+     */
     public boolean isConnected() {
         return connected;
     }
 
+    /**
+     * Sets whether client is connected or not.
+     *
+     * @param connected client's connection status
+     */
     public void setConnected(boolean connected) {
         this.connected = connected;
     }
 
+    /**
+     * Returns client's authentication method.
+     *
+     * @return client's authentication method
+     */
     public Authentication getAuthentication() {
         return authentication;
     }
 
+    /**
+     * Sets client's authentication method.
+     *
+     * @param authentication client's authentication method
+     */
     public void setAuthentication(Authentication authentication) {
         this.authentication = authentication;
     }
@@ -64,7 +104,8 @@ public abstract class Client {
      * List<URI> list = client.list();}</pre>
      *
      * @return resources represented by resource locations (URIs)
-     * @throws CommunicationException
+     * @throws CommunicationException when error occured during the
+     * communication with server
      */
     public abstract List<URI> list() throws CommunicationException;
 
@@ -81,7 +122,8 @@ public abstract class Client {
      * @param resourceType resource type in shortened format (e.g. "compute",
      * "storage", "network")
      * @return resources represented by resource locations (URIs)
-     * @throws CommunicationException
+     * @throws CommunicationException when error occured during the
+     * communication with server
      */
     public abstract List<URI> list(String resourceType) throws CommunicationException;
 
@@ -97,7 +139,8 @@ public abstract class Client {
      *
      * @param resourceIdentifier full resource type identifier
      * @return resources represented by resource locations (URIs)
-     * @throws CommunicationException
+     * @throws CommunicationException when error occured during the
+     * communication with server
      */
     public abstract List<URI> list(URI resourceIdentifier) throws CommunicationException;
 
@@ -111,7 +154,8 @@ public abstract class Client {
      * List<Entity> list = client.describe();}</pre>
      *
      * @return list of resource or link descriptions
-     * @throws CommunicationException
+     * @throws CommunicationException when error occured during the
+     * communication with server
      */
     public abstract List<Entity> describe() throws CommunicationException;
 
@@ -127,7 +171,8 @@ public abstract class Client {
      * @param resourceType resource type in shortened format (e.g. "compute",
      * "storage", "network")
      * @return list of resource or link descriptions
-     * @throws CommunicationException
+     * @throws CommunicationException when error occured during the
+     * communication with server
      */
     public abstract List<Entity> describe(String resourceType) throws CommunicationException;
 
@@ -146,7 +191,8 @@ public abstract class Client {
      * @param resourceIdentifier either full resource type identifier or full
      * resource identifier
      * @return list of resource or link descriptions
-     * @throws CommunicationException
+     * @throws CommunicationException when error occured during the
+     * communication with server
      */
     public abstract List<Entity> describe(URI resourceIdentifier) throws CommunicationException;
 
@@ -167,7 +213,8 @@ public abstract class Client {
      *
      * @param entity Creates a new resource on the server.
      * @return URI of the new resource
-     * @throws CommunicationException
+     * @throws CommunicationException when error occured during the
+     * communication with server
      */
     public abstract URI create(Entity entity) throws CommunicationException;
 
@@ -182,8 +229,9 @@ public abstract class Client {
      *
      * @param resourceType resource type in shortened format (e.g. "compute",
      * "storage", "network")
-     * @return status
-     * @throws CommunicationException
+     * @return true if the deletion was successful, false otherwise
+     * @throws CommunicationException when error occured during the
+     * communication with server
      */
     public abstract boolean delete(String resourceType) throws CommunicationException;
 
@@ -201,8 +249,9 @@ public abstract class Client {
      *
      * @param resourceIdentifier either full resource type identifier or full
      * resource identifier
-     * @return status
-     * @throws CommunicationException
+     * @return true if the deletion was successful, false otherwise
+     * @throws CommunicationException when error occured during the
+     * communication with server
      */
     public abstract boolean delete(URI resourceIdentifier) throws CommunicationException;
 
@@ -221,8 +270,9 @@ public abstract class Client {
      * @param resourceType resource type in shortened format (e.g. "compute",
      * "storage", "network")
      * @param action type of action
-     * @return status
-     * @throws CommunicationException
+     * @return true if the action was successful, false otherwise
+     * @throws CommunicationException when error occured during the
+     * communication with server
      */
     public abstract boolean trigger(String resourceType, ActionInstance action) throws CommunicationException;
 
@@ -243,8 +293,9 @@ public abstract class Client {
      * @param resourceIdentifier either full resource type identifier or full
      * resource identifier
      * @param action type of action
-     * @return status
-     * @throws CommunicationException
+     * @return true if the action was successful, false otherwise
+     * @throws CommunicationException when error occured during the
+     * communication with server
      */
     public abstract boolean trigger(URI resourceIdentifier, ActionInstance action) throws CommunicationException;
 
@@ -253,14 +304,16 @@ public abstract class Client {
      * without creating a new instance or reconnecting. Saves a lot of time in
      * an interactive mode.
      *
-     * @throws CommunicationException
+     * @throws CommunicationException when error occured during the
+     * communication with server
      */
     public abstract void refresh() throws CommunicationException;
 
     /**
      * Establishes a connection.
      *
-     * @throws CommunicationException
+     * @throws CommunicationException when error occured during the
+     * communication with server
      */
     public abstract void connect() throws CommunicationException;
 }
