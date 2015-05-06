@@ -233,6 +233,7 @@ public class HTTPClient extends Client {
         } else {
             Kind kind;
             try {
+                checkConnection();
                 kind = getModel().findKind(resourceType);
             } catch (AmbiguousIdentifierException ex) {
                 throw new CommunicationException(ex);
@@ -251,6 +252,7 @@ public class HTTPClient extends Client {
      */
     @Override
     public List<URI> list(URI resourceIdentifier) throws CommunicationException {
+        checkConnection();
         Kind kind = getModel().findKind(resourceIdentifier);
         if (kind == null) {
             throw new CommunicationException("unknown resource identifier '" + resourceIdentifier + "'");
@@ -290,6 +292,7 @@ public class HTTPClient extends Client {
      */
     @Override
     public List<Entity> describe(String resourceType) throws CommunicationException {
+        checkConnection();
         Model model = getModel();
         try {
             Kind kind = model.findKind(resourceType);
@@ -312,6 +315,7 @@ public class HTTPClient extends Client {
      */
     @Override
     public List<Entity> describe(URI resourceIdentifier) throws CommunicationException {
+        checkConnection();
         Model model = getModel();
         Kind kind = model.findKind(resourceIdentifier);
         if (kind != null) {
@@ -418,6 +422,7 @@ public class HTTPClient extends Client {
     public boolean delete(String resourceType) throws CommunicationException {
         Kind kind;
         try {
+            checkConnection();
             kind = getModel().findKind(resourceType);
         } catch (AmbiguousIdentifierException ex) {
             throw new CommunicationException(ex);
@@ -436,6 +441,7 @@ public class HTTPClient extends Client {
      */
     @Override
     public boolean delete(URI resourceIdentifier) throws CommunicationException {
+        checkConnection();
         Kind kind = getModel().findKind(resourceIdentifier);
         HttpDelete httpDelete;
         if (kind != null) {
@@ -457,6 +463,7 @@ public class HTTPClient extends Client {
     public boolean trigger(String resourceType, ActionInstance action) throws CommunicationException {
         Kind kind;
         try {
+            checkConnection();
             kind = getModel().findKind(resourceType);
         } catch (AmbiguousIdentifierException ex) {
             throw new CommunicationException(ex);
@@ -496,6 +503,7 @@ public class HTTPClient extends Client {
      */
     @Override
     public boolean trigger(URI resourceIdentifier, ActionInstance action) throws CommunicationException {
+        checkConnection();
         Kind kind = getModel().findKind(resourceIdentifier);
         String url;
         if (kind != null) {
