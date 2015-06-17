@@ -30,6 +30,7 @@ import org.apache.http.client.methods.HttpHead;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -159,10 +160,15 @@ public abstract class HTTPAuthentication implements Authentication {
 
         LOGGER.debug("Running authentication...");
         try {
-            CloseableHttpClient client = HttpClients.custom()
+
+            HttpClientBuilder builder = HttpClients.custom()
                     .setDefaultCredentialsProvider(credentialsProvider)
-                    .setSSLSocketFactory(sslsf)
-                    .build();
+                    .setSSLSocketFactory(sslsf);
+            if (LOGGER.isDebugEnabled()) {
+                builder.disableContentCompression();
+            }
+
+            CloseableHttpClient client = builder.build();
             connection.setClient(client);
             HttpHead httpHead = HTTPHelper.prepareHead(Client.MODEL_URI, connection.getHeaders());
             try (CloseableHttpResponse response = connection.getClient().execute(target, httpHead, connection.getContext())) {

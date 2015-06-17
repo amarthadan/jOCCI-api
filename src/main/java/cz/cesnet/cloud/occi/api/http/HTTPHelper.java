@@ -4,6 +4,7 @@ import cz.cesnet.cloud.occi.api.exception.CommunicationException;
 import java.io.IOException;
 import java.net.URI;
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpStatus;
@@ -112,10 +113,11 @@ public class HTTPHelper {
         try {
             CloseableHttpResponse response = client.execute(target, httpRequest, context);
             if (response.getStatusLine().getStatusCode() != status) {
-                if (response.getEntity() != null) {
-                    LOGGER.error("Response: {}\nHeaders: {}\nBody: {}", response.getStatusLine().toString(), response.getAllHeaders(), EntityUtils.toString(response.getEntity()));
+                HttpEntity entity = response.getEntity();
+                if (entity != null) {
+                    LOGGER.debug("Response: {}\nHeaders: {}\nBody: {}", response.getStatusLine().toString(), response.getAllHeaders(), EntityUtils.toString(entity));
                 } else {
-                    LOGGER.error("Response: {}\nHeaders: {}\nBody:\n", response.getStatusLine().toString(), response.getAllHeaders());
+                    LOGGER.debug("Response: {}\nHeaders: {}\nBody:\n", response.getStatusLine().toString(), response.getAllHeaders());
                 }
                 throw new CommunicationException(response.getStatusLine().toString());
             }
