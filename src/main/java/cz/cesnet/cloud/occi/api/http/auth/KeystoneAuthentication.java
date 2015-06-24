@@ -178,7 +178,8 @@ public class KeystoneAuthentication extends HTTPAuthentication {
 
         String identifier = originalAuthentication.getIdentifier();
         switch (identifier) {
-            case X509Authentication.IDENTIFIER: {
+            //case X509Authentication.IDENTIFIER: // not sure if should be here or not
+            case VOMSAuthentication.IDENTIFIER: {
                 writer.writeBoolean("voms", true);
             }
             break;
