@@ -26,7 +26,7 @@ import java.util.UUID;
  * @author Michal Kimle <kimle.michal@gmail.com>
  */
 public class EntityBuilder {
-    
+
     private Model model;
 
     /**
@@ -38,32 +38,32 @@ public class EntityBuilder {
         if (model == null) {
             throw new NullPointerException("model cannot be null");
         }
-        
+
         this.model = model;
     }
-    
+
     private Kind getKind(String type) throws EntityBuildingException, AmbiguousIdentifierException {
         Kind kind = model.findKind(type);
         if (kind == null) {
             throw new EntityBuildingException("unknown type '" + type + "'");
         }
-        
+
         return kind;
     }
-    
+
     private Kind getKind(URI identifier) throws EntityBuildingException {
         Kind kind = model.findKind(identifier);
         if (kind == null) {
             throw new EntityBuildingException("unknown identifier '" + identifier + "'");
         }
-        
+
         return kind;
     }
-    
+
     private Kind getKind(Class resourceClass) throws EntityBuildingException {
         URI uri = null;
         Kind defaultKind = null;
-        
+
         if (resourceClass.equals(Compute.class)) {
             uri = URI.create(Compute.KIND_IDENTIFIER_DEFAULT);
             defaultKind = Compute.getDefaultKind();
@@ -80,39 +80,39 @@ public class EntityBuilder {
             uri = URI.create(NetworkInterface.KIND_IDENTIFIER_DEFAULT);
             defaultKind = NetworkInterface.getDefaultKind();
         }
-        
+
         Kind kind = getKind(uri);
         if (kind == null) {
             kind = defaultKind;
         }
-        
+
         return kind;
     }
-    
+
     private Mixin getMixin(URI identifier) throws EntityBuildingException {
         Mixin mixin = model.findMixin(identifier);
         if (mixin == null) {
             throw new EntityBuildingException("unknown identifier '" + identifier + "'");
         }
-        
+
         return mixin;
     }
-    
+
     private Action getAction(String type) throws EntityBuildingException, AmbiguousIdentifierException {
         Action action = model.findAction(type);
         if (action == null) {
             throw new EntityBuildingException("unknown type '" + type + "'");
         }
-        
+
         return action;
     }
-    
+
     private Action getAction(URI identifier) throws EntityBuildingException {
         Action action = model.findAction(identifier);
         if (action == null) {
             throw new EntityBuildingException("unknown identifier '" + identifier + "'");
         }
-        
+
         return action;
     }
 
@@ -200,75 +200,178 @@ public class EntityBuilder {
     public ActionInstance getActionInstance(URI actionIdentifier) throws EntityBuildingException {
         return createActionInstance(getAction(actionIdentifier));
     }
-    
+
+    /**
+     * Creates an compute instance identified by resourceIdentifier (compute's
+     * scheme+term).
+     *
+     * @param resourceIdentifier
+     * @return new Compute instance identified by resourceIdentifier
+     * @throws EntityBuildingException if compute with specified identifier is
+     * not found in the model
+     */
     public Compute getCompute(URI resourceIdentifier) throws EntityBuildingException {
         return createCompute(getKind(resourceIdentifier));
     }
-    
+
+    /**
+     * Creates a default compute instance.
+     *
+     * @return new default Compute instance
+     * @throws EntityBuildingException
+     */
     public Compute getCompute() throws EntityBuildingException {
         return createCompute(getKind(Compute.class));
     }
-    
+
+    /**
+     * Creates an network instance identified by resourceIdentifier (network's
+     * scheme+term).
+     *
+     * @param resourceIdentifier
+     * @return new Network instance identified by resourceIdentifier
+     * @throws EntityBuildingException
+     */
     public Network getNetwork(URI resourceIdentifier) throws EntityBuildingException {
         return createNetwork(getKind(resourceIdentifier));
     }
-    
+
+    /**
+     * Creates a default network instance.
+     *
+     * @return new default Network instance
+     * @throws EntityBuildingException
+     */
     public Network getNetwork() throws EntityBuildingException {
         return createNetwork(getKind(Network.class));
     }
-    
+
+    /**
+     * Creates an storage instance identified by resourceIdentifier (storage's
+     * scheme+term).
+     *
+     * @param resourceIdentifier
+     * @return new Storage instance identified by resourceIdentifier
+     * @throws EntityBuildingException
+     */
     public Storage getStorage(URI resourceIdentifier) throws EntityBuildingException {
         return createStorage(getKind(resourceIdentifier));
     }
-    
+
+    /**
+     * Creates a default storage instance.
+     *
+     * @return new default Storage instance
+     * @throws EntityBuildingException
+     */
     public Storage getStorage() throws EntityBuildingException {
         return createStorage(getKind(Storage.class));
     }
-    
+
+    /**
+     * Creates an storage link instance identified by resourceIdentifier (link's
+     * scheme+term).
+     *
+     * @param resourceIdentifier
+     * @return new StorageLink instance identified by resourceIdentifier
+     * @throws EntityBuildingException
+     */
     public StorageLink getStorageLink(URI resourceIdentifier) throws EntityBuildingException {
         return createStorageLink(getKind(resourceIdentifier));
     }
-    
+
+    /**
+     * Creates a default storage link instance.
+     *
+     * @return new default StorageLink instance
+     * @throws EntityBuildingException
+     */
     public StorageLink getStorageLink() throws EntityBuildingException {
         return createStorageLink(getKind(StorageLink.class));
     }
-    
+
+    /**
+     * Creates an network interface instance identified by resourceIdentifier
+     * (interface's scheme+term).
+     *
+     * @param resourceIdentifier
+     * @return new NetworkInterface instance identified by resourceIdentifier
+     * @throws EntityBuildingException
+     */
     public NetworkInterface getNetworkInterface(URI resourceIdentifier) throws EntityBuildingException {
         return createNetworkInterface(getKind(resourceIdentifier));
     }
-    
+
+    /**
+     * Creates a default network interface instance.
+     *
+     * @return new default NetworkInterface instance
+     * @throws EntityBuildingException
+     */
     public NetworkInterface getNetworkInterface() throws EntityBuildingException {
         return createNetworkInterface(getKind(NetworkInterface.class));
     }
-    
-    public IPNetwork getIPNetwork() throws EntityBuildingException {
-        Kind kind = getKind(Network.class);
-        Mixin mixin = getMixin(URI.create("http://schemas.ogf.org/occi/infrastructure/network#ipnetwork"));
-        if (mixin == null) {
-            mixin = IPNetwork.getDefaultMixin();
-        }
-        
-        return createIPNetwork(kind, mixin);
-    }
-    
+
+    /**
+     * Creates an ip network instance identified by kind and mixin identifier
+     * (scheme+term).
+     *
+     * @param kindIdentifier
+     * @param mixinIdentifier
+     * @return new IPNetwork instance identified by its kind and mixin
+     * identifiers
+     * @throws EntityBuildingException
+     */
     public IPNetwork getIPNetwork(URI kindIdentifier, URI mixinIdentifier) throws EntityBuildingException {
         return createIPNetwork(getKind(kindIdentifier), getMixin(mixinIdentifier));
     }
-    
-    public IPNetworkInterface getIPNetworkInterface() throws EntityBuildingException {
-        Kind kind = getKind(NetworkInterface.class);
-        Mixin mixin = getMixin(URI.create("http://schemas.ogf.org/occi/infrastructure/networkinterface#ipnetwork"));
+
+    /**
+     * Creates a default ip network instance.
+     *
+     * @return new default IPNetwork instance
+     * @throws EntityBuildingException
+     */
+    public IPNetwork getIPNetwork() throws EntityBuildingException {
+        Kind kind = getKind(Network.class);
+        Mixin mixin = getMixin(URI.create(IPNetwork.MIXIN_IDENTIFIER_DEFAULT));
         if (mixin == null) {
-            mixin = IPNetworkInterface.getDefaultMixin();
+            mixin = IPNetwork.getDefaultMixin();
         }
-        
-        return createIPNetworkInterface(kind, mixin);
+
+        return createIPNetwork(kind, mixin);
     }
-    
+
+    /**
+     * Creates an ip network interface instance identified by kind and mixin
+     * identifier (scheme+term).
+     *
+     * @param kindIdentifier
+     * @param mixinIdentifier
+     * @return new IPNetworkInterface instance identified by its kind and mixin
+     * identifiers
+     * @throws EntityBuildingException
+     */
     public IPNetworkInterface getIPNetworkInterface(URI kindIdentifier, URI mixinIdentifier) throws EntityBuildingException {
         return createIPNetworkInterface(getKind(kindIdentifier), getMixin(mixinIdentifier));
     }
-    
+
+    /**
+     * Creates a default ip network interface instance.
+     *
+     * @return new default IPNetworkInterface instance
+     * @throws EntityBuildingException
+     */
+    public IPNetworkInterface getIPNetworkInterface() throws EntityBuildingException {
+        Kind kind = getKind(NetworkInterface.class);
+        Mixin mixin = getMixin(URI.create(IPNetworkInterface.MIXIN_IDENTIFIER_DEFAULT));
+        if (mixin == null) {
+            mixin = IPNetworkInterface.getDefaultMixin();
+        }
+
+        return createIPNetworkInterface(kind, mixin);
+    }
+
     private Resource createResource(Kind kind) {
         try {
             Resource resource = new Resource(UUID.randomUUID().toString(), kind);
@@ -278,7 +381,7 @@ public class EntityBuilder {
             throw new RuntimeException("Invalid ID attribute value. This should not happen!", ex);
         }
     }
-    
+
     private Link createLink(Kind kind) {
         try {
             Link link = new Link(UUID.randomUUID().toString(), kind);
@@ -288,13 +391,13 @@ public class EntityBuilder {
             throw new RuntimeException("Invalid ID attribute value. This should not happen!", ex);
         }
     }
-    
+
     private ActionInstance createActionInstance(Action action) {
         ActionInstance ai = new ActionInstance(action);
         ai.setModel(model);
         return ai;
     }
-    
+
     private Compute createCompute(Kind kind) {
         try {
             Compute compute = new Compute(UUID.randomUUID().toString(), kind);
@@ -304,7 +407,7 @@ public class EntityBuilder {
             throw new RuntimeException("Invalid ID attribute value. This should not happen!", ex);
         }
     }
-    
+
     private Network createNetwork(Kind kind) {
         try {
             Network network = new Network(UUID.randomUUID().toString(), kind);
@@ -314,7 +417,7 @@ public class EntityBuilder {
             throw new RuntimeException("Invalid ID attribute value. This should not happen!", ex);
         }
     }
-    
+
     private Storage createStorage(Kind kind) {
         try {
             Storage storage = new Storage(UUID.randomUUID().toString(), kind);
@@ -324,7 +427,7 @@ public class EntityBuilder {
             throw new RuntimeException("Invalid ID attribute value. This should not happen!", ex);
         }
     }
-    
+
     private StorageLink createStorageLink(Kind kind) {
         try {
             StorageLink storageLink = new StorageLink(UUID.randomUUID().toString(), kind);
@@ -334,7 +437,7 @@ public class EntityBuilder {
             throw new RuntimeException("Invalid ID attribute value. This should not happen!", ex);
         }
     }
-    
+
     private NetworkInterface createNetworkInterface(Kind kind) {
         try {
             NetworkInterface networkInterface = new NetworkInterface(UUID.randomUUID().toString(), kind);
@@ -344,7 +447,7 @@ public class EntityBuilder {
             throw new RuntimeException("Invalid ID attribute value. This should not happen!", ex);
         }
     }
-    
+
     private IPNetwork createIPNetwork(Kind kind, Mixin mixin) {
         try {
             IPNetwork ipnetwork = new IPNetwork(UUID.randomUUID().toString(), kind);
@@ -355,7 +458,7 @@ public class EntityBuilder {
             throw new RuntimeException("Invalid ID attribute value. This should not happen!", ex);
         }
     }
-    
+
     private IPNetworkInterface createIPNetworkInterface(Kind kind, Mixin mixin) {
         try {
             IPNetworkInterface ipnetworkInterface = new IPNetworkInterface(UUID.randomUUID().toString(), kind);
