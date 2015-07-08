@@ -26,7 +26,7 @@ import java.util.UUID;
  * @author Michal Kimle <kimle.michal@gmail.com>
  */
 public class EntityBuilder {
-
+    
     private Model model;
 
     /**
@@ -38,191 +38,82 @@ public class EntityBuilder {
         if (model == null) {
             throw new NullPointerException("model cannot be null");
         }
-
+        
         this.model = model;
     }
-
+    
     private Kind getKind(String type) throws EntityBuildingException, AmbiguousIdentifierException {
         Kind kind = model.findKind(type);
         if (kind == null) {
             throw new EntityBuildingException("unknown type '" + type + "'");
         }
-
+        
         return kind;
     }
-
+    
     private Kind getKind(URI identifier) throws EntityBuildingException {
         Kind kind = model.findKind(identifier);
         if (kind == null) {
             throw new EntityBuildingException("unknown identifier '" + identifier + "'");
         }
-
+        
         return kind;
     }
-
-    private Mixin getMixin(String type) throws EntityBuildingException, AmbiguousIdentifierException {
-        Mixin mixin = model.findMixin(type);
-        if (mixin == null) {
-            throw new EntityBuildingException("unknown type '" + type + "'");
+    
+    private Kind getKind(Class resourceClass) throws EntityBuildingException {
+        URI uri = null;
+        Kind defaultKind = null;
+        
+        if (resourceClass.equals(Compute.class)) {
+            uri = URI.create(Compute.KIND_IDENTIFIER_DEFAULT);
+            defaultKind = Compute.getDefaultKind();
+        } else if (resourceClass.equals(Network.class)) {
+            uri = URI.create(Network.KIND_IDENTIFIER_DEFAULT);
+            defaultKind = Network.getDefaultKind();
+        } else if (resourceClass.equals(Storage.class)) {
+            uri = URI.create(Storage.KIND_IDENTIFIER_DEFAULT);
+            defaultKind = Storage.getDefaultKind();
+        } else if (resourceClass.equals(StorageLink.class)) {
+            uri = URI.create(StorageLink.KIND_IDENTIFIER_DEFAULT);
+            defaultKind = StorageLink.getDefaultKind();
+        } else if (resourceClass.equals(NetworkInterface.class)) {
+            uri = URI.create(NetworkInterface.KIND_IDENTIFIER_DEFAULT);
+            defaultKind = NetworkInterface.getDefaultKind();
         }
-
-        return mixin;
+        
+        Kind kind = getKind(uri);
+        if (kind == null) {
+            kind = defaultKind;
+        }
+        
+        return kind;
     }
-
+    
     private Mixin getMixin(URI identifier) throws EntityBuildingException {
         Mixin mixin = model.findMixin(identifier);
         if (mixin == null) {
             throw new EntityBuildingException("unknown identifier '" + identifier + "'");
         }
-
+        
         return mixin;
     }
-
+    
     private Action getAction(String type) throws EntityBuildingException, AmbiguousIdentifierException {
         Action action = model.findAction(type);
         if (action == null) {
             throw new EntityBuildingException("unknown type '" + type + "'");
         }
-
+        
         return action;
     }
-
+    
     private Action getAction(URI identifier) throws EntityBuildingException {
         Action action = model.findAction(identifier);
         if (action == null) {
             throw new EntityBuildingException("unknown identifier '" + identifier + "'");
         }
-
+        
         return action;
-    }
-
-    /**
-     * Creates a resource of given resourceType (kind's term).
-     *
-     * @param resourceType
-     * @return new Resource instance of given resourceType
-     * @throws EntityBuildingException if resource type is ambiguous
-     */
-    public Resource getResource(String resourceType) throws EntityBuildingException {
-        try {
-            Kind kind = getKind(resourceType);
-            return createResource(kind);
-        } catch (AmbiguousIdentifierException ex) {
-            throw new EntityBuildingException(ex);
-        }
-    }
-
-    /**
-     * Creates a resource identified by resourceIdentifier (kind's scheme+term).
-     *
-     * @param resourceIdentifier
-     * @return new Resource instance identified by resourceIdentifier
-     * @throws EntityBuildingException if kind with specified identifier is not
-     * found in the model
-     */
-    public Resource getResource(URI resourceIdentifier) throws EntityBuildingException {
-        return createResource(getKind(resourceIdentifier));
-    }
-
-    public Compute getCompute(URI resourceIdentifier) throws EntityBuildingException {
-        return createCompute(getKind(resourceIdentifier));
-    }
-
-    public Compute getCompute() throws EntityBuildingException {
-        Kind kind = getKind(URI.create("http://schemas.ogf.org/occi/infrastructure#compute"));
-        if (kind == null) {
-            return createCompute(Compute.getDefaultKind());
-        } else {
-            return createCompute(kind);
-        }
-    }
-
-    private Kind getNetworkKind() throws EntityBuildingException {
-        Kind kind = getKind(URI.create("http://schemas.ogf.org/occi/infrastructure#network"));
-        if (kind == null) {
-            kind = Network.getDefaultKind();
-        }
-
-        return kind;
-    }
-
-    public Network getNetwork(URI resourceIdentifier) throws EntityBuildingException {
-        return createNetwork(getKind(resourceIdentifier));
-    }
-
-    public Network getNetwork() throws EntityBuildingException {
-        return createNetwork(getNetworkKind());
-    }
-
-    public Storage getStorage(URI resourceIdentifier) throws EntityBuildingException {
-        return createStorage(getKind(resourceIdentifier));
-    }
-
-    public Storage getStorage() throws EntityBuildingException {
-        Kind kind = getKind(URI.create("http://schemas.ogf.org/occi/infrastructure#storage"));
-        if (kind == null) {
-            return createStorage(Storage.getDefaultKind());
-        } else {
-            return createStorage(kind);
-        }
-    }
-
-    public StorageLink getStorageLink(URI resourceIdentifier) throws EntityBuildingException {
-        return createStorageLink(getKind(resourceIdentifier));
-    }
-
-    public StorageLink getStorageLink() throws EntityBuildingException {
-        Kind kind = getKind(URI.create("http://schemas.ogf.org/occi/infrastructure#storagelink"));
-        if (kind == null) {
-            return createStorageLink(StorageLink.getDefaultKind());
-        } else {
-            return createStorageLink(kind);
-        }
-    }
-
-    private Kind getNetworkInterfaceKind() throws EntityBuildingException {
-        Kind kind = getKind(URI.create("http://schemas.ogf.org/occi/infrastructure#networkinterface"));
-        if (kind == null) {
-            kind = NetworkInterface.getDefaultKind();
-        }
-
-        return kind;
-    }
-
-    public NetworkInterface getNetworkInterface(URI resourceIdentifier) throws EntityBuildingException {
-        return createNetworkInterface(getKind(resourceIdentifier));
-    }
-
-    public NetworkInterface getNetworkInterface() throws EntityBuildingException {
-        return createNetworkInterface(getNetworkInterfaceKind());
-    }
-
-    public IPNetwork getIPNetwork(URI kindIdentifier, URI mixinIdentifier) throws EntityBuildingException {
-        return createIPNetwork(getKind(kindIdentifier), getMixin(mixinIdentifier));
-    }
-
-    public IPNetwork getIPNetwork() throws EntityBuildingException {
-        Kind kind = getNetworkKind();
-        Mixin mixin = getMixin(URI.create("http://schemas.ogf.org/occi/infrastructure/network#ipnetwork"));
-        if (mixin == null) {
-            mixin = IPNetwork.getDefaultMixin();
-        }
-
-        return createIPNetwork(kind, mixin);
-    }
-
-    public IPNetworkInterface getIPNetworkInterface(URI kindIdentifier, URI mixinIdentifier) throws EntityBuildingException {
-        return createIPNetworkInterface(getKind(kindIdentifier), getMixin(mixinIdentifier));
-    }
-
-    public IPNetworkInterface getIPNetworkInterface() throws EntityBuildingException {
-        Kind kind = getNetworkInterfaceKind();
-        Mixin mixin = getMixin(URI.create("http://schemas.ogf.org/occi/infrastructure/networkinterface#ipnetwork"));
-        if (mixin == null) {
-            mixin = IPNetworkInterface.getDefaultMixin();
-        }
-
-        return createIPNetworkInterface(kind, mixin);
     }
 
     /**
@@ -254,6 +145,34 @@ public class EntityBuilder {
     }
 
     /**
+     * Creates a resource of given resourceType (kind's term).
+     *
+     * @param resourceType
+     * @return new Resource instance of given resourceType
+     * @throws EntityBuildingException if resource type is ambiguous
+     */
+    public Resource getResource(String resourceType) throws EntityBuildingException {
+        try {
+            Kind kind = getKind(resourceType);
+            return createResource(kind);
+        } catch (AmbiguousIdentifierException ex) {
+            throw new EntityBuildingException(ex);
+        }
+    }
+
+    /**
+     * Creates a resource identified by resourceIdentifier (kind's scheme+term).
+     *
+     * @param resourceIdentifier
+     * @return new Resource instance identified by resourceIdentifier
+     * @throws EntityBuildingException if kind with specified identifier is not
+     * found in the model
+     */
+    public Resource getResource(URI resourceIdentifier) throws EntityBuildingException {
+        return createResource(getKind(resourceIdentifier));
+    }
+
+    /**
      * Creates an action instance of given actionType (action's term).
      *
      * @param actionType
@@ -281,7 +200,75 @@ public class EntityBuilder {
     public ActionInstance getActionInstance(URI actionIdentifier) throws EntityBuildingException {
         return createActionInstance(getAction(actionIdentifier));
     }
-
+    
+    public Compute getCompute(URI resourceIdentifier) throws EntityBuildingException {
+        return createCompute(getKind(resourceIdentifier));
+    }
+    
+    public Compute getCompute() throws EntityBuildingException {
+        return createCompute(getKind(Compute.class));
+    }
+    
+    public Network getNetwork(URI resourceIdentifier) throws EntityBuildingException {
+        return createNetwork(getKind(resourceIdentifier));
+    }
+    
+    public Network getNetwork() throws EntityBuildingException {
+        return createNetwork(getKind(Network.class));
+    }
+    
+    public Storage getStorage(URI resourceIdentifier) throws EntityBuildingException {
+        return createStorage(getKind(resourceIdentifier));
+    }
+    
+    public Storage getStorage() throws EntityBuildingException {
+        return createStorage(getKind(Storage.class));
+    }
+    
+    public StorageLink getStorageLink(URI resourceIdentifier) throws EntityBuildingException {
+        return createStorageLink(getKind(resourceIdentifier));
+    }
+    
+    public StorageLink getStorageLink() throws EntityBuildingException {
+        return createStorageLink(getKind(StorageLink.class));
+    }
+    
+    public NetworkInterface getNetworkInterface(URI resourceIdentifier) throws EntityBuildingException {
+        return createNetworkInterface(getKind(resourceIdentifier));
+    }
+    
+    public NetworkInterface getNetworkInterface() throws EntityBuildingException {
+        return createNetworkInterface(getKind(NetworkInterface.class));
+    }
+    
+    public IPNetwork getIPNetwork() throws EntityBuildingException {
+        Kind kind = getKind(Network.class);
+        Mixin mixin = getMixin(URI.create("http://schemas.ogf.org/occi/infrastructure/network#ipnetwork"));
+        if (mixin == null) {
+            mixin = IPNetwork.getDefaultMixin();
+        }
+        
+        return createIPNetwork(kind, mixin);
+    }
+    
+    public IPNetwork getIPNetwork(URI kindIdentifier, URI mixinIdentifier) throws EntityBuildingException {
+        return createIPNetwork(getKind(kindIdentifier), getMixin(mixinIdentifier));
+    }
+    
+    public IPNetworkInterface getIPNetworkInterface() throws EntityBuildingException {
+        Kind kind = getKind(NetworkInterface.class);
+        Mixin mixin = getMixin(URI.create("http://schemas.ogf.org/occi/infrastructure/networkinterface#ipnetwork"));
+        if (mixin == null) {
+            mixin = IPNetworkInterface.getDefaultMixin();
+        }
+        
+        return createIPNetworkInterface(kind, mixin);
+    }
+    
+    public IPNetworkInterface getIPNetworkInterface(URI kindIdentifier, URI mixinIdentifier) throws EntityBuildingException {
+        return createIPNetworkInterface(getKind(kindIdentifier), getMixin(mixinIdentifier));
+    }
+    
     private Resource createResource(Kind kind) {
         try {
             Resource resource = new Resource(UUID.randomUUID().toString(), kind);
@@ -291,7 +278,7 @@ public class EntityBuilder {
             throw new RuntimeException("Invalid ID attribute value. This should not happen!", ex);
         }
     }
-
+    
     private Link createLink(Kind kind) {
         try {
             Link link = new Link(UUID.randomUUID().toString(), kind);
@@ -301,13 +288,13 @@ public class EntityBuilder {
             throw new RuntimeException("Invalid ID attribute value. This should not happen!", ex);
         }
     }
-
+    
     private ActionInstance createActionInstance(Action action) {
         ActionInstance ai = new ActionInstance(action);
         ai.setModel(model);
         return ai;
     }
-
+    
     private Compute createCompute(Kind kind) {
         try {
             Compute compute = new Compute(UUID.randomUUID().toString(), kind);
@@ -317,7 +304,7 @@ public class EntityBuilder {
             throw new RuntimeException("Invalid ID attribute value. This should not happen!", ex);
         }
     }
-
+    
     private Network createNetwork(Kind kind) {
         try {
             Network network = new Network(UUID.randomUUID().toString(), kind);
@@ -327,7 +314,7 @@ public class EntityBuilder {
             throw new RuntimeException("Invalid ID attribute value. This should not happen!", ex);
         }
     }
-
+    
     private Storage createStorage(Kind kind) {
         try {
             Storage storage = new Storage(UUID.randomUUID().toString(), kind);
@@ -337,7 +324,7 @@ public class EntityBuilder {
             throw new RuntimeException("Invalid ID attribute value. This should not happen!", ex);
         }
     }
-
+    
     private StorageLink createStorageLink(Kind kind) {
         try {
             StorageLink storageLink = new StorageLink(UUID.randomUUID().toString(), kind);
@@ -347,7 +334,7 @@ public class EntityBuilder {
             throw new RuntimeException("Invalid ID attribute value. This should not happen!", ex);
         }
     }
-
+    
     private NetworkInterface createNetworkInterface(Kind kind) {
         try {
             NetworkInterface networkInterface = new NetworkInterface(UUID.randomUUID().toString(), kind);
@@ -357,7 +344,7 @@ public class EntityBuilder {
             throw new RuntimeException("Invalid ID attribute value. This should not happen!", ex);
         }
     }
-
+    
     private IPNetwork createIPNetwork(Kind kind, Mixin mixin) {
         try {
             IPNetwork ipnetwork = new IPNetwork(UUID.randomUUID().toString(), kind);
@@ -368,7 +355,7 @@ public class EntityBuilder {
             throw new RuntimeException("Invalid ID attribute value. This should not happen!", ex);
         }
     }
-
+    
     private IPNetworkInterface createIPNetworkInterface(Kind kind, Mixin mixin) {
         try {
             IPNetworkInterface ipnetworkInterface = new IPNetworkInterface(UUID.randomUUID().toString(), kind);
