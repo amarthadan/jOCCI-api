@@ -79,10 +79,14 @@ public class EntityBuilder {
         } else if (resourceClass.equals(NetworkInterface.class)) {
             uri = URI.create(NetworkInterface.KIND_IDENTIFIER_DEFAULT);
             defaultKind = NetworkInterface.getDefaultKind();
+        } else {
+            throw new EntityBuildingException("unknown class '" + resourceClass.getName() + "'");
         }
 
-        Kind kind = getKind(uri);
-        if (kind == null) {
+        Kind kind;
+        try {
+            kind = getKind(uri);
+        } catch (EntityBuildingException ex) {
             kind = defaultKind;
         }
 
@@ -334,8 +338,11 @@ public class EntityBuilder {
      */
     public IPNetwork getIPNetwork() throws EntityBuildingException {
         Kind kind = getKind(Network.class);
-        Mixin mixin = getMixin(URI.create(IPNetwork.MIXIN_IDENTIFIER_DEFAULT));
-        if (mixin == null) {
+
+        Mixin mixin;
+        try {
+            mixin = getMixin(URI.create(IPNetwork.MIXIN_IDENTIFIER_DEFAULT));
+        } catch (EntityBuildingException ex) {
             mixin = IPNetwork.getDefaultMixin();
         }
 
@@ -364,8 +371,11 @@ public class EntityBuilder {
      */
     public IPNetworkInterface getIPNetworkInterface() throws EntityBuildingException {
         Kind kind = getKind(NetworkInterface.class);
-        Mixin mixin = getMixin(URI.create(IPNetworkInterface.MIXIN_IDENTIFIER_DEFAULT));
-        if (mixin == null) {
+
+        Mixin mixin;
+        try {
+            mixin = getMixin(URI.create(IPNetworkInterface.MIXIN_IDENTIFIER_DEFAULT));
+        } catch (EntityBuildingException ex) {
             mixin = IPNetworkInterface.getDefaultMixin();
         }
 
