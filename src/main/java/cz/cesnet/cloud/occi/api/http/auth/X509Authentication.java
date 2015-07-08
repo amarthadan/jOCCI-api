@@ -30,6 +30,7 @@ import javax.net.ssl.SSLContext;
 import org.apache.http.conn.ssl.SSLContexts;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMReader;
+import org.bouncycastle.openssl.PasswordFinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -194,7 +195,12 @@ public class X509Authentication extends HTTPAuthentication {
             while (startIndex != -1) {
                 endIndex = certFileString.indexOf(CERT_END, startIndex);
                 String oneCert = certFileString.substring(startIndex, endIndex + CERT_END.length());
-                reader = new PEMReader(new InputStreamReader(new ByteArrayInputStream(oneCert.getBytes())));
+                reader = new PEMReader(new InputStreamReader(new ByteArrayInputStream(oneCert.getBytes())), new PasswordFinder() {
+                    @Override
+                    public char[] getPassword() {
+                        return password == null ? null : password.toCharArray();
+                    }
+                });
                 X509Certificate cert = (X509Certificate) reader.readObject();
                 if (cert == null) {
                     throw new AuthenticationException("cannot load user certificate");
@@ -221,7 +227,12 @@ public class X509Authentication extends HTTPAuthentication {
             endIndex = matcher.end(1);
 
             String key = certFileString.substring(startIndex, endIndex).trim();
-            reader = new PEMReader(new InputStreamReader(new ByteArrayInputStream(key.getBytes())));
+            reader = new PEMReader(new InputStreamReader(new ByteArrayInputStream(key.getBytes())), new PasswordFinder() {
+                @Override
+                public char[] getPassword() {
+                    return password == null ? null : password.toCharArray();
+                }
+            });
 
             Object object = reader.readObject();
             PrivateKey pk = null;
