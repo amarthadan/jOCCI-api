@@ -28,7 +28,6 @@ public class AdvancedUsageExample {
 
     public static void main(String[] args) {
         try {
-            //supports also VOMS certificates
             HTTPAuthentication authentication = new X509Authentication("/path/to/certificate.pem", "password");
             //set custom certificates if needed
             authentication.setCAPath("/path/to/certificate/directory");

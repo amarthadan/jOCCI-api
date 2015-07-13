@@ -288,4 +288,32 @@ public class DataGenerator {
 
         return ai;
     }
+
+    public static Kind getCustomComputeKind() throws URISyntaxException {
+        return new Kind(new URI("http://custom.testing.org/occi/infra#"), "compute", null, null, null);
+    }
+
+    public static Kind getCustomStorageKind() throws URISyntaxException {
+        return new Kind(new URI("http://custom.testing.org/occi/infra#"), "storage", null, null, null);
+    }
+
+    public static Kind getCustomNetworkKind() throws URISyntaxException {
+        return new Kind(new URI("http://custom.testing.org/occi/infra#"), "network", null, null, null);
+    }
+
+    public static Kind getCustomStorageLinkKind() throws URISyntaxException {
+        return new Kind(new URI("http://custom.testing.org/occi/infra#"), "storagelink", null, null, null);
+    }
+
+    public static Kind getCustomNetworkInterfaceKind() throws URISyntaxException {
+        return new Kind(new URI("http://custom.testing.org/occi/infra#"), "networkinterface", null, null, null);
+    }
+
+    public static Mixin getCustomIPNetworkMixin() throws URISyntaxException {
+        return new Mixin(new URI("http://custom.testing.org/occi/infra#"), "ipnetwork", null, null, null);
+    }
+
+    public static Mixin getCustomIPNetworkInterfaceMixin() throws URISyntaxException {
+        return new Mixin(new URI("http://custom.testing.org/occi/infra#"), "ipnetworkinterface", null, null, null);
+    }
 }
