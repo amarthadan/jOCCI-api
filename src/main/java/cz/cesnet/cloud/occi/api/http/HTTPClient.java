@@ -407,7 +407,7 @@ public class HTTPClient extends Client {
 
             //HACK
             //so communication with servers with WRONG OCCI implementation will work
-            if (!responseMediaType.equals(MediaType.TEXT_OCCI) && responseBody.length() < 5 && responseHeaders.containsKey("Location")) {
+            if (!responseMediaType.equals(MediaType.TEXT_OCCI) && responseBody.trim().equals("OK") && responseHeaders.containsKey("Location")) {
                 responseMediaType = MediaType.TEXT_OCCI;
             }
             //HACK
