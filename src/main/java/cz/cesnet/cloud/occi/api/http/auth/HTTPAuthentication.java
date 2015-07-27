@@ -176,6 +176,7 @@ public abstract class HTTPAuthentication implements Authentication {
                     Authentication fallback = getFallback();
                     if (response.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED && fallback != null) {
                         if (fallback instanceof KeystoneAuthentication) {
+                            LOGGER.debug("Running Keystone fallback...");
                             KeystoneAuthentication ka = (KeystoneAuthentication) fallback;
                             ka.setOriginalResponse(response);
                             ka.authenticate();
