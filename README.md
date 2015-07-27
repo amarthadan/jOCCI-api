@@ -15,7 +15,7 @@ Using Maven:
 <dependency>
     <groupId>cz.cesnet.cloud</groupId>
     <artifactId>jocci-api</artifactId>
-    <version>0.1.4</version>
+    <version>0.1.5</version>
 </dependency>
 ```
 

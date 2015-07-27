@@ -114,12 +114,12 @@ public class HTTPHelper {
             CloseableHttpResponse response = client.execute(target, httpRequest, context);
             if (response.getStatusLine().getStatusCode() != status) {
                 HttpEntity entity = response.getEntity();
+                String body = "";
                 if (entity != null) {
-                    LOGGER.debug("Response: {}\nHeaders: {}\nBody: {}", response.getStatusLine().toString(), response.getAllHeaders(), EntityUtils.toString(entity));
-                } else {
-                    LOGGER.debug("Response: {}\nHeaders: {}\nBody:\n", response.getStatusLine().toString(), response.getAllHeaders());
+                    body = EntityUtils.toString(entity);
                 }
-                throw new CommunicationException(response.getStatusLine().toString());
+                LOGGER.debug("Response: {}\nHeaders: {}\nBody: {}", response.getStatusLine().toString(), response.getAllHeaders(), body);
+                throw new CommunicationException(response.getStatusLine().toString() + "\n" + body);
             }
 
             return response;

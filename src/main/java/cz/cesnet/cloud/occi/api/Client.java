@@ -205,11 +205,12 @@ public abstract class Client {
      * <pre>{@code
      * Model model = client.getModel();
      *EntityBuilder entityBuilder = new EntityBuilder(model);
-     *Resource resource = entityBuilder.getResource("compute");
-     *resource.addMixin(model.findMixin("debian7", "os_tpl"));
-     *resource.addMixin(model.findMixin("small", "resource_tpl"));
-     *resource.addAttribute(Compute.MEMORY_ATTRIBUTE_NAME, "2048");
-     *URI location = client.create(resource);}</pre>
+     *Compute compute = entityBuilder.getCompute();
+     *compute.addMixin(model.findMixin("debian7", "os_tpl"));
+     *compute.addMixin(model.findMixin("small", "resource_tpl"));
+     *compute.setMemory(1024);
+     *compute.setCores(4);
+     *URI location = client.create(compute);}</pre>
      *
      * @param entity Creates a new resource on the server.
      * @return URI of the new resource
