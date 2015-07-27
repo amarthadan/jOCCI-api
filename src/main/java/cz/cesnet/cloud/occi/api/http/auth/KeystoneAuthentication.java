@@ -89,9 +89,15 @@ public class KeystoneAuthentication extends HTTPAuthentication {
 
         URI keystoneURI = URI.create(matcher.group(GROUP_URI));
         HttpHost target = new HttpHost(keystoneURI.getHost(), keystoneURI.getPort(), keystoneURI.getScheme());
+        //TODO
+        //this path normalization should be handled in a better way
         String path = keystoneURI.getPath();
         if (path == null) {
             path = "";
+        }
+
+        if (path.endsWith("/")) {
+            path = path.substring(0, path.length() - 1);
         }
 
         if (!path.endsWith(PATH_DEFAULT)) {
