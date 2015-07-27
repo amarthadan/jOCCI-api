@@ -404,6 +404,14 @@ public class HTTPClient extends Client {
 
             checkConnection();
             runAndParseRequest(httpPost, HttpStatus.SC_CREATED);
+
+            //HACK
+            //so communication with servers with WRONG OCCI implementation will work
+            if (!responseMediaType.equals(MediaType.TEXT_OCCI) && responseBody.length() < 5 && responseHeaders.containsKey("Location")) {
+                responseMediaType = MediaType.TEXT_OCCI;
+            }
+            //HACK
+
             List<URI> locations = parser.parseLocations(responseMediaType, responseBody, responseHeaders);
             if (locations == null || locations.isEmpty()) {
                 throw new CommunicationException("no location returned");
