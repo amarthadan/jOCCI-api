@@ -13,7 +13,7 @@
         "equalTo" : "occi.core.id=\"5537b49a-bb2e-4302-bf8b-da38611247ca\""
       },
       "Category" : {
-        "equalTo" : "compute;scheme=\"http://schemas.ogf.org/occi/infrastructure#\";class=\"kind\";title=\"compute resource\";rel=\"http://schemas.ogf.org/occi/core#resource\";location=\"/compute/\";attributes=\"occi.compute.architecture occi.compute.cores occi.compute.hostname occi.compute.memory occi.compute.speed occi.compute.state{immutable} occi.core.id{required immutable} occi.core.summary occi.core.title\";actions=\"http://schemas.ogf.org/occi/infrastructure/compute/action#restart http://schemas.ogf.org/occi/infrastructure/compute/action#start http://schemas.ogf.org/occi/infrastructure/compute/action#stop http://schemas.ogf.org/occi/infrastructure/compute/action#suspend\""
+        "equalTo" : "compute;scheme=\"http://schemas.ogf.org/occi/infrastructure#\";class=\"kind\""
       }
     }
   },
