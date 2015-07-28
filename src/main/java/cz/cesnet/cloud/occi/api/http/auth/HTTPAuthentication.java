@@ -25,6 +25,7 @@ import javax.net.ssl.SSLContext;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -32,6 +33,7 @@ import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.util.EntityUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMReader;
@@ -161,9 +163,16 @@ public abstract class HTTPAuthentication implements Authentication {
         LOGGER.debug("Running authentication...");
         try {
 
+            RequestConfig defaultRequestConfig = RequestConfig.custom()
+                    .setSocketTimeout(5000)
+                    .setConnectTimeout(5000)
+                    .setConnectionRequestTimeout(5000)
+                    .build();
+
             HttpClientBuilder builder = HttpClients.custom()
                     .setDefaultCredentialsProvider(credentialsProvider)
-                    .setSSLSocketFactory(sslsf);
+                    .setSSLSocketFactory(sslsf)
+                    .setDefaultRequestConfig(defaultRequestConfig);
             if (LOGGER.isDebugEnabled()) {
                 builder.disableContentCompression();
             }
