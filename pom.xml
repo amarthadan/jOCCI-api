@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>cz.cesnet.cloud</groupId>
     <artifactId>jocci-api</artifactId>
-    <version>0.2.0</version>
+    <version>0.2.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>A Java OCCI framework - transport api library.</description>
@@ -26,7 +26,7 @@
         <connection>scm:git:git@github.com:EGI-FCTF/jOCCI-api.git</connection>
         <developerConnection>scm:git:git@github.com:EGI-FCTF/jOCCI-api.git</developerConnection>
         <url>https://github.com/EGI-FCTF/jOCCI-api</url>
-        <tag>jocci-api-0.2.0</tag>
+        <tag>HEAD</tag>
     </scm>
     <dependencies>
         <dependency>
