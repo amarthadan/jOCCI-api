@@ -176,7 +176,7 @@ public class HTTPClient extends Client {
     private Headers convertHeaders(Header[] apacheHeaders) {
         Headers javaHeaders = new Headers();
         for (Header header : apacheHeaders) {
-            javaHeaders.add(header.getName(), header.getValue());
+            javaHeaders.add(header.getName().toLowerCase(), header.getValue());
         }
 
         return javaHeaders;
