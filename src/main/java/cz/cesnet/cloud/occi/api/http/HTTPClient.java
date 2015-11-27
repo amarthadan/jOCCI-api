@@ -34,6 +34,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
@@ -423,6 +424,42 @@ public class HTTPClient extends Client {
         }
     }
 
+    /**
+     * @see Client#update(cz.cesnet.cloud.occi.core.Entity)
+     */
+    @Override
+    public boolean update(Entity entity) throws CommunicationException {
+        Kind kind = entity.getKind();
+        if (kind == null) {
+            throw new CommunicationException("entity with empty kind");
+        }
+
+        HttpPut httpPut = HTTPHelper.preparePut(kind.getLocation() + entity.getId(), connection.getHeaders());
+        try {
+            switch (mediaType) {
+                case MediaType.TEXT_OCCI: {
+                    Headers headers = entity.toHeaders();
+                    addHeaders(httpPut, headers);
+                }
+                break;
+                case MediaType.TEXT_PLAIN: {
+                    HttpEntity httpEntity = new StringEntity(entity.toText());
+                    httpPut.setEntity(httpEntity);
+                }
+                break;
+                default:
+                    throw new CommunicationException("unsupported media type '" + mediaType + "'");
+            }
+
+            checkConnection();
+            runAndParseRequest(httpPut, HttpStatus.SC_OK);
+
+            return true;
+        } catch (RenderingException | UnsupportedEncodingException ex) {
+            throw new CommunicationException(ex);
+        }
+    }
+    
     /**
      * @see Client#delete(java.lang.String)
      */
