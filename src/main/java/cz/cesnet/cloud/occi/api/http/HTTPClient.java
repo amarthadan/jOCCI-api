@@ -452,9 +452,8 @@ public class HTTPClient extends Client {
             }
 
             checkConnection();
-            runAndParseRequest(httpPut, HttpStatus.SC_OK);
+            return HTTPHelper.runRequestForStatus(httpPut, target, connection.getClient(), connection.getContext());
 
-            return true;
         } catch (RenderingException | UnsupportedEncodingException ex) {
             throw new CommunicationException(ex);
         }
