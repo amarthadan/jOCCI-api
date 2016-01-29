@@ -1,7 +1,7 @@
 package cz.cesnet.cloud.occi.api.http.auth;
 
-import com.owlike.genson.stream.JsonReader;
-import com.owlike.genson.stream.JsonWriter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import cz.cesnet.cloud.occi.api.Authentication;
 import cz.cesnet.cloud.occi.api.exception.AuthenticationException;
 import cz.cesnet.cloud.occi.api.exception.CommunicationException;
@@ -10,6 +10,7 @@ import cz.cesnet.cloud.occi.api.http.HTTPHelper;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.StringReader;
 import java.net.URI;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -141,28 +142,27 @@ public class KeystoneAuthentication extends HTTPAuthentication {
         }
     }
 
-    private void tryTenants(String json, HttpHost target, String path, CloseableHttpClient client, HttpContext context) throws AuthenticationException {
-        try (JsonReader reader = new JsonReader(json)) {
+    private void tryTenants(String json, HttpHost target, String path, CloseableHttpClient client, HttpContext context) throws AuthenticationException, CommunicationException {
+        try (JsonReader reader = new JsonReader(new StringReader(json))) {
             reader.beginObject();
             while (reader.hasNext()) {
-                reader.next();
-                if (!reader.name().equals("tenants")) {
+                String name = reader.nextName();
+                if (!name.equals("tenants")) {
                     reader.skipValue();
                     continue;
                 }
 
                 reader.beginArray();
                 while (reader.hasNext()) {
-                    reader.next();
                     reader.beginObject();
                     while (reader.hasNext()) {
-                        reader.next();
-                        if (!reader.name().equals("name")) {
+                        name = reader.nextName();
+                        if (!name.equals("name")) {
                             reader.skipValue();
                             continue;
                         }
 
-                        String tenant = reader.valueAsString();
+                        String tenant = reader.nextString();
                         try {
                             String response = authenticateAgainstKeystone(target, path, client, context, tenant);
                             authToken = parseId(response);
@@ -176,75 +176,80 @@ public class KeystoneAuthentication extends HTTPAuthentication {
                 reader.endArray();
                 throw new AuthenticationException("no suitable tenant found");
             }
+        } catch (IOException ex) {
+            throw new CommunicationException(ex);
         }
     }
 
-    private String getRequestBody(String tenant) throws AuthenticationException {
+    private String getRequestBody(String tenant) throws AuthenticationException, CommunicationException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        JsonWriter writer = new JsonWriter(new OutputStreamWriter(out));
-        writer.beginObject();
-        writer.writeName("auth");
-        writer.beginObject();
+        try (JsonWriter writer = new JsonWriter(new OutputStreamWriter(out))) {
+            writer.beginObject();
+            writer.name("auth");
+            writer.beginObject();
 
-        String identifier = originalAuthentication.getIdentifier();
-        switch (identifier) {
-            //case X509Authentication.IDENTIFIER: // not sure if should be here or not
-            case VOMSAuthentication.IDENTIFIER: {
-                writer.writeBoolean("voms", true);
+            String identifier = originalAuthentication.getIdentifier();
+            switch (identifier) {
+                //case X509Authentication.IDENTIFIER: // not sure if should be here or not
+                case VOMSAuthentication.IDENTIFIER: {
+                    writer.name("voms").value(true);
+                }
+                break;
+                case BasicAuthentication.IDENTIFIER:
+                case DigestAuthentication.IDENTIFIER: {
+                    BasicAuthentication ba = (BasicAuthentication) originalAuthentication;
+                    writer.name("passwordCredentials");
+                    writer.beginObject();
+                    writer.name("username").value(ba.getUsername());
+                    writer.name("password").value(ba.getPassword());
+                    writer.endObject();
+                }
+                break;
+                default:
+                    throw new AuthenticationException("unknown original authentication method");
             }
-            break;
-            case BasicAuthentication.IDENTIFIER:
-            case DigestAuthentication.IDENTIFIER: {
-                BasicAuthentication ba = (BasicAuthentication) originalAuthentication;
-                writer.writeName("passwordCredentials");
-                writer.beginObject();
-                writer.writeString("username", ba.getUsername());
-                writer.writeString("password", ba.getPassword());
-                writer.endObject();
+
+            if (tenant != null) {
+                writer.name("tenantName").value(tenant);
             }
-            break;
-            default:
-                throw new AuthenticationException("unknown original authentication method");
-        }
+            writer.endObject();
+            writer.endObject();
+            writer.close();
 
-        if (tenant != null) {
-            writer.writeString("tenantName", tenant);
+            return out.toString();
+        } catch (IOException ex) {
+            throw new CommunicationException(ex);
         }
-        writer.endObject();
-        writer.endObject();
-        writer.close();
-
-        return out.toString();
     }
 
-    private String parseId(String json) {
-        try (JsonReader reader = new JsonReader(json)) {
+    private String parseId(String json) throws CommunicationException {
+        try (JsonReader reader = new JsonReader(new StringReader(json))) {
             String id = null;
             reader.beginObject();
             while (reader.hasNext()) {
-                reader.next();
-                if (!reader.name().equals("access")) {
+                String name = reader.nextName();
+                if (!name.equals("access")) {
                     reader.skipValue();
                     continue;
                 }
 
                 reader.beginObject();
                 while (reader.hasNext()) {
-                    reader.next();
-                    if (!reader.name().equals("token")) {
+                    name = reader.nextName();
+                    if (!name.equals("token")) {
                         reader.skipValue();
                         continue;
                     }
 
                     reader.beginObject();
                     while (reader.hasNext()) {
-                        reader.next();
-                        if (!reader.name().equals("id")) {
+                        name = reader.nextName();
+                        if (!name.equals("id")) {
                             reader.skipValue();
                             continue;
                         }
 
-                        id = reader.valueAsString();
+                        id = reader.nextString();
                         break;
                     }
                     break;
@@ -253,6 +258,8 @@ public class KeystoneAuthentication extends HTTPAuthentication {
             }
 
             return id;
+        } catch (IOException ex) {
+            throw new CommunicationException(ex);
         }
     }
 
