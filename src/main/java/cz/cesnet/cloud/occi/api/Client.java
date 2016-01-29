@@ -219,6 +219,8 @@ public abstract class Client {
      */
     public abstract URI create(Entity entity) throws CommunicationException;
 
+    public abstract boolean update(Entity entity) throws CommunicationException;
+    
     /**
      * Deletes all resource of a certain resource type from the server.
      *
