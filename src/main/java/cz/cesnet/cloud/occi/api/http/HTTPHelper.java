@@ -28,91 +28,97 @@ public class HTTPHelper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HTTPHelper.class);
 
-    public static HttpGet prepareGet(String uri, Header[] headers) {
-        HttpGet httpGet = new HttpGet(uri);
+    public static HttpGet prepareGet(String uri, Header[] headers, String prefix) {
+        HttpGet httpGet = new HttpGet(addPrefix(uri, prefix));
         httpGet.setHeaders(headers);
         return httpGet;
     }
 
     public static HttpGet prepareGet(String uri) {
-        return prepareGet(uri, null);
+        return prepareGet(uri, null, "");
     }
 
-    public static HttpHead prepareHead(String uri, Header[] headers) {
-        HttpHead httpHead = new HttpHead(uri);
+    public static HttpHead prepareHead(String uri, Header[] headers, String prefix) {
+        HttpHead httpHead = new HttpHead(addPrefix(uri, prefix));
         httpHead.setHeaders(headers);
         return httpHead;
     }
 
     public static HttpHead prepareHead(String uri) {
-        return prepareHead(uri, null);
+        return prepareHead(uri, null, "");
     }
 
-    public static HttpGet prepareGet(URI uri, Header[] headers) {
-        HttpGet httpGet = new HttpGet(uri);
+    public static HttpGet prepareGet(URI uri, Header[] headers, String prefix) {
+        HttpGet httpGet = new HttpGet(addPrefix(uri.toString(), prefix));
         httpGet.setHeaders(headers);
         return httpGet;
     }
 
     public static HttpGet prepareGet(URI uri) {
-        return prepareGet(uri, null);
+        return prepareGet(uri, null, "");
     }
 
-    public static HttpHead prepareHead(URI uri, Header[] headers) {
-        HttpHead httpHead = new HttpHead(uri);
+    public static HttpHead prepareHead(URI uri, Header[] headers, String prefix) {
+        HttpHead httpHead = new HttpHead(addPrefix(uri.toString(), prefix));
         httpHead.setHeaders(headers);
         return httpHead;
     }
 
     public static HttpHead prepareHead(URI uri) {
-        return prepareHead(uri, null);
+        return prepareHead(uri, null, "");
     }
 
-    public static HttpDelete prepareDelete(String uri, Header[] headers) {
-        HttpDelete httpDelete = new HttpDelete(uri);
+    public static HttpDelete prepareDelete(String uri, Header[] headers, String prefix) {
+        HttpDelete httpDelete = new HttpDelete(addPrefix(uri, prefix));
         httpDelete.setHeaders(headers);
         return httpDelete;
     }
 
     public static HttpDelete prepareDelete(String uri) {
-        return prepareDelete(uri, null);
+        return prepareDelete(uri, null, "");
     }
 
-    public static HttpDelete prepareDelete(URI uri, Header[] headers) {
-        HttpDelete httpDelete = new HttpDelete(uri);
+    public static HttpDelete prepareDelete(URI uri, Header[] headers, String prefix) {
+        HttpDelete httpDelete = new HttpDelete(addPrefix(uri.toString(), prefix));
         httpDelete.setHeaders(headers);
         return httpDelete;
     }
 
     public static HttpDelete prepareDelete(URI uri) {
-        return prepareDelete(uri, null);
+        return prepareDelete(uri, null, "");
     }
 
-    public static HttpPost preparePost(String uri, Header[] headers) {
-        HttpPost httpPost = new HttpPost(uri);
+    public static HttpPost preparePost(String uri, Header[] headers, String prefix) {
+        HttpPost httpPost = new HttpPost(addPrefix(uri, prefix));
         httpPost.setHeaders(headers);
         return httpPost;
     }
 
     public static HttpPost preparePost(String uri) {
-        return preparePost(uri, null);
+        return preparePost(uri, null, "");
     }
 
-    public static HttpPost preparePost(URI uri, Header[] headers) {
-        HttpPost httpPost = new HttpPost(uri);
+    public static HttpPost preparePost(URI uri, Header[] headers, String prefix) {
+        HttpPost httpPost = new HttpPost(addPrefix(uri.toString(), prefix));
         httpPost.setHeaders(headers);
         return httpPost;
     }
 
     public static HttpPost preparePost(URI uri) {
-        return preparePost(uri, null);
+        return preparePost(uri, null, "");
     }
 
-    public static CloseableHttpResponse runRequest(HttpRequest httpRequest, HttpHost target, CloseableHttpClient client, HttpContext context, int status
+    public static CloseableHttpResponse runRequest(HttpRequest httpRequest, HttpHost target, CloseableHttpClient client, HttpContext context, int[] statuses
     ) throws CommunicationException {
         try {
             CloseableHttpResponse response = client.execute(target, httpRequest, context);
-            if (response.getStatusLine().getStatusCode() != status) {
+            boolean acceptableStatus = false;
+            for (int status : statuses) {
+                if (response.getStatusLine().getStatusCode() == status) {
+                    acceptableStatus = true;
+                }
+            }
+            if (!acceptableStatus) {
                 HttpEntity entity = response.getEntity();
                 String body = "";
                 if (entity != null) {
@@ -129,14 +135,20 @@ public class HTTPHelper {
     }
 
     public static CloseableHttpResponse runRequest(HttpRequest httpRequest, HttpHost target, CloseableHttpClient client, HttpContext context) throws CommunicationException {
-        return runRequest(httpRequest, target, client, context, HttpStatus.SC_OK);
+        return runRequest(httpRequest, target, client, context, new int[]{HttpStatus.SC_OK});
     }
 
-    public static boolean runRequestForStatus(HttpRequest httpRequest, HttpHost target, CloseableHttpClient client, HttpContext context, int status
+    public static boolean runRequestForStatus(HttpRequest httpRequest, HttpHost target, CloseableHttpClient client, HttpContext context, int[] statuses
     ) throws CommunicationException {
         try {
             try (CloseableHttpResponse response = client.execute(target, httpRequest, context)) {
-                return response.getStatusLine().getStatusCode() == status;
+                boolean acceptableStatus = false;
+                for (int status : statuses) {
+                    if (response.getStatusLine().getStatusCode() == status) {
+                        acceptableStatus = true;
+                    }
+                }
+                return acceptableStatus;
             }
         } catch (IOException ex) {
             throw new CommunicationException(ex);
@@ -144,6 +156,14 @@ public class HTTPHelper {
     }
 
     public static boolean runRequestForStatus(HttpRequest httpRequest, HttpHost target, CloseableHttpClient client, HttpContext context) throws CommunicationException {
-        return runRequestForStatus(httpRequest, target, client, context, HttpStatus.SC_OK);
+        return runRequestForStatus(httpRequest, target, client, context, new int[]{HttpStatus.SC_OK, HttpStatus.SC_NO_CONTENT});
+    }
+
+    private static String addPrefix(String uri, String prefix) {
+        if (uri.contains(prefix)) {
+            return uri;
+        } else {
+            return prefix + uri;
+        }
     }
 }

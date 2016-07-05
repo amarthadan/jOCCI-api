@@ -164,9 +164,9 @@ public abstract class HTTPAuthentication implements Authentication {
         try {
 
             RequestConfig defaultRequestConfig = RequestConfig.custom()
-                    .setSocketTimeout(5000)
-                    .setConnectTimeout(5000)
-                    .setConnectionRequestTimeout(5000)
+                    .setSocketTimeout(10000)
+                    .setConnectTimeout(10000)
+                    .setConnectionRequestTimeout(10000)
                     .build();
 
             HttpClientBuilder builder = HttpClients.custom()
@@ -179,7 +179,7 @@ public abstract class HTTPAuthentication implements Authentication {
 
             CloseableHttpClient client = builder.build();
             connection.setClient(client);
-            HttpHead httpHead = HTTPHelper.prepareHead(Client.MODEL_URI, connection.getHeaders());
+            HttpHead httpHead = HTTPHelper.prepareHead(Client.MODEL_URI, connection.getHeaders(), connection.getPrefix());
             try (CloseableHttpResponse response = connection.getClient().execute(target, httpHead, connection.getContext())) {
                 if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
                     Authentication fallback = getFallback();
@@ -218,10 +218,8 @@ public abstract class HTTPAuthentication implements Authentication {
         KeyStore keyStore = null;
         if (CAFile != null && !CAFile.isEmpty()) {
             keyStore = loadCAsFromFile();
-        } else {
-            if (CAPath != null && !CAPath.isEmpty()) {
-                keyStore = loadCAsFromPath();
-            }
+        } else if (CAPath != null && !CAPath.isEmpty()) {
+            keyStore = loadCAsFromPath();
         }
 
         return keyStore;

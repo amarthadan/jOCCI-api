@@ -19,6 +19,7 @@ public class HTTPConnection {
     private CloseableHttpClient client = null;
     private HttpContext context = HttpClientContext.create();
     private List<Header> headers = new ArrayList<>();
+    private String prefix = "";
 
     public CloseableHttpClient getClient() {
         return client;
@@ -34,6 +35,17 @@ public class HTTPConnection {
 
     public void setContext(HttpContext context) {
         this.context = context;
+    }
+
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
+        if (prefix == null) {
+            this.prefix = "";
+        }
     }
 
     public Header[] getHeaders() {
