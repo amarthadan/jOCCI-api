@@ -29,7 +29,7 @@ public class HTTPHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(HTTPHelper.class);
 
     public static HttpGet prepareGet(String uri, Header[] headers, String prefix) {
-        HttpGet httpGet = new HttpGet(prefix + uri);
+        HttpGet httpGet = new HttpGet(addPrefix(uri, prefix));
         httpGet.setHeaders(headers);
         return httpGet;
     }
@@ -39,7 +39,7 @@ public class HTTPHelper {
     }
 
     public static HttpHead prepareHead(String uri, Header[] headers, String prefix) {
-        HttpHead httpHead = new HttpHead(prefix + uri);
+        HttpHead httpHead = new HttpHead(addPrefix(uri, prefix));
         httpHead.setHeaders(headers);
         return httpHead;
     }
@@ -49,7 +49,7 @@ public class HTTPHelper {
     }
 
     public static HttpGet prepareGet(URI uri, Header[] headers, String prefix) {
-        HttpGet httpGet = new HttpGet(prefix + uri);
+        HttpGet httpGet = new HttpGet(addPrefix(uri.toString(), prefix));
         httpGet.setHeaders(headers);
         return httpGet;
     }
@@ -59,7 +59,7 @@ public class HTTPHelper {
     }
 
     public static HttpHead prepareHead(URI uri, Header[] headers, String prefix) {
-        HttpHead httpHead = new HttpHead(prefix + uri);
+        HttpHead httpHead = new HttpHead(addPrefix(uri.toString(), prefix));
         httpHead.setHeaders(headers);
         return httpHead;
     }
@@ -69,7 +69,7 @@ public class HTTPHelper {
     }
 
     public static HttpDelete prepareDelete(String uri, Header[] headers, String prefix) {
-        HttpDelete httpDelete = new HttpDelete(prefix + uri);
+        HttpDelete httpDelete = new HttpDelete(addPrefix(uri, prefix));
         httpDelete.setHeaders(headers);
         return httpDelete;
     }
@@ -79,7 +79,7 @@ public class HTTPHelper {
     }
 
     public static HttpDelete prepareDelete(URI uri, Header[] headers, String prefix) {
-        HttpDelete httpDelete = new HttpDelete(prefix + uri);
+        HttpDelete httpDelete = new HttpDelete(addPrefix(uri.toString(), prefix));
         httpDelete.setHeaders(headers);
         return httpDelete;
     }
@@ -89,7 +89,7 @@ public class HTTPHelper {
     }
 
     public static HttpPost preparePost(String uri, Header[] headers, String prefix) {
-        HttpPost httpPost = new HttpPost(prefix + uri);
+        HttpPost httpPost = new HttpPost(addPrefix(uri, prefix));
         httpPost.setHeaders(headers);
         return httpPost;
     }
@@ -99,7 +99,7 @@ public class HTTPHelper {
     }
 
     public static HttpPost preparePost(URI uri, Header[] headers, String prefix) {
-        HttpPost httpPost = new HttpPost(prefix + uri);
+        HttpPost httpPost = new HttpPost(addPrefix(uri.toString(), prefix));
         httpPost.setHeaders(headers);
         return httpPost;
     }
@@ -145,5 +145,12 @@ public class HTTPHelper {
 
     public static boolean runRequestForStatus(HttpRequest httpRequest, HttpHost target, CloseableHttpClient client, HttpContext context) throws CommunicationException {
         return runRequestForStatus(httpRequest, target, client, context, HttpStatus.SC_OK);
+
+    private static String addPrefix(String uri, String prefix) {
+        if (uri.contains(prefix)) {
+            return uri;
+        } else {
+            return prefix + uri;
+        }
     }
 }
