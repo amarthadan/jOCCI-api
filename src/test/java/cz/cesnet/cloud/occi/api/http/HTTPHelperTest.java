@@ -33,13 +33,14 @@ import org.junit.Rule;
  */
 public class HTTPHelperTest {
 
-    Header[] headers;
-    String uri;
-    URI uuri;
-    CloseableHttpClient client;
-    HttpContext context;
-    int status;
-    HttpHost target;
+    private Header[] headers;
+    private String uri;
+    private URI uuri;
+    private CloseableHttpClient client;
+    private HttpContext context;
+    private int status;
+    private HttpHost target;
+    private String prefix;
 
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(8123);
@@ -49,17 +50,18 @@ public class HTTPHelperTest {
         headers = new Header[2];
         headers[0] = new BasicHeader(HttpHeaders.ACCEPT, "text/plain");
         headers[1] = new BasicHeader(HttpHeaders.CONTENT_TYPE, "text/plain");
-        uri = "http://some.nonexisting.uri.net";
+        uri = "/some/path";
         uuri = URI.create(uri);
         client = HttpClients.createDefault();
         context = HttpClientContext.create();
         status = HttpStatus.SC_ACCEPTED;
         target = new HttpHost("localhost", 8123, "http");
+        prefix = "/prefix";
     }
 
     @Test
     public void testPrepareGetWithStringAndHeaders() {
-        HttpGet message = HTTPHelper.prepareGet(uri, headers);
+        HttpGet message = HTTPHelper.prepareGet(uri, headers, "");
 
         assertArrayEquals(headers, message.getAllHeaders());
         assertEquals(uri, message.getURI().toString());
@@ -75,10 +77,10 @@ public class HTTPHelperTest {
 
     @Test
     public void testPrepareHeadWithStringAndHeaders() {
-        HttpHead message = HTTPHelper.prepareHead(uri, headers);
+        HttpHead message = HTTPHelper.prepareHead(uri, headers, prefix);
 
         assertArrayEquals(headers, message.getAllHeaders());
-        assertEquals(uri, message.getURI().toString());
+        assertEquals(prefix + uri, message.getURI().toString());
     }
 
     @Test
@@ -91,7 +93,7 @@ public class HTTPHelperTest {
 
     @Test
     public void testPrepareGetWithURIAndHeaders() {
-        HttpGet message = HTTPHelper.prepareGet(uuri, headers);
+        HttpGet message = HTTPHelper.prepareGet(uuri, headers, "");
 
         assertArrayEquals(headers, message.getAllHeaders());
         assertEquals(uuri, message.getURI());
@@ -107,10 +109,10 @@ public class HTTPHelperTest {
 
     @Test
     public void testPrepareHeadWithURIAndHeaders() {
-        HttpHead message = HTTPHelper.prepareHead(uuri, headers);
+        HttpHead message = HTTPHelper.prepareHead(uuri, headers, prefix);
 
         assertArrayEquals(headers, message.getAllHeaders());
-        assertEquals(uuri, message.getURI());
+        assertEquals(prefix + uuri, message.getURI().toString());
     }
 
     @Test
@@ -123,7 +125,7 @@ public class HTTPHelperTest {
 
     @Test
     public void testPrepareDeleteWithStringAndHeaders() {
-        HttpDelete message = HTTPHelper.prepareDelete(uri, headers);
+        HttpDelete message = HTTPHelper.prepareDelete(uri, headers, "");
 
         assertArrayEquals(headers, message.getAllHeaders());
         assertEquals(uri, message.getURI().toString());
@@ -139,10 +141,10 @@ public class HTTPHelperTest {
 
     @Test
     public void testPrepareDeleteWithURIAndHeaders() {
-        HttpDelete message = HTTPHelper.prepareDelete(uuri, headers);
+        HttpDelete message = HTTPHelper.prepareDelete(uuri, headers, prefix);
 
         assertArrayEquals(headers, message.getAllHeaders());
-        assertEquals(uuri, message.getURI());
+        assertEquals(prefix + uuri, message.getURI().toString());
     }
 
     @Test
@@ -155,7 +157,7 @@ public class HTTPHelperTest {
 
     @Test
     public void testPreparePostWithStringAndHeaders() {
-        HttpPost message = HTTPHelper.preparePost(uri, headers);
+        HttpPost message = HTTPHelper.preparePost(uri, headers, "");
 
         assertArrayEquals(headers, message.getAllHeaders());
         assertEquals(uri, message.getURI().toString());
@@ -171,10 +173,10 @@ public class HTTPHelperTest {
 
     @Test
     public void testPreparePostWithURIAndHeaders() {
-        HttpPost message = HTTPHelper.preparePost(uuri, headers);
+        HttpPost message = HTTPHelper.preparePost(uuri, headers, prefix);
 
         assertArrayEquals(headers, message.getAllHeaders());
-        assertEquals(uuri, message.getURI());
+        assertEquals(prefix + uuri, message.getURI().toString());
     }
 
     @Test
@@ -187,7 +189,7 @@ public class HTTPHelperTest {
 
     @Test
     public void testRunRequestWithStatus() throws Exception {
-        HttpRequest httpRequest = HTTPHelper.prepareGet("/differentcode/", headers);
+        HttpRequest httpRequest = HTTPHelper.prepareGet("/differentcode/", headers, "");
         CloseableHttpResponse response = HTTPHelper.runRequest(httpRequest, target, client, context, status);
 
         assertNotNull(response);
@@ -196,7 +198,7 @@ public class HTTPHelperTest {
 
     @Test
     public void testInvalidRunRequestWithStatus() throws Exception {
-        HttpRequest httpRequest = HTTPHelper.prepareGet("/xyz/", headers);
+        HttpRequest httpRequest = HTTPHelper.prepareGet("/xyz/", headers, "");
         try {
             CloseableHttpResponse response = HTTPHelper.runRequest(httpRequest, target, client, context, status);
         } catch (CommunicationException ex) {
@@ -213,7 +215,7 @@ public class HTTPHelperTest {
 
     @Test
     public void testRunRequestWithoutStatus() throws Exception {
-        HttpRequest httpRequest = HTTPHelper.prepareGet("/", headers);
+        HttpRequest httpRequest = HTTPHelper.prepareGet("/", headers, "");
         CloseableHttpResponse response = HTTPHelper.runRequest(httpRequest, target, client, context);
 
         assertNotNull(response);
@@ -222,7 +224,7 @@ public class HTTPHelperTest {
 
     @Test
     public void testInvalidRunRequestWithoutStatus() throws Exception {
-        HttpRequest httpRequest = HTTPHelper.prepareGet("/xyz/", headers);
+        HttpRequest httpRequest = HTTPHelper.prepareGet("/xyz/", headers, "");
         try {
             CloseableHttpResponse response = HTTPHelper.runRequest(httpRequest, target, client, context);
         } catch (CommunicationException ex) {
@@ -239,22 +241,22 @@ public class HTTPHelperTest {
 
     @Test
     public void testRunRequestForStatusWithStatus() throws Exception {
-        HttpRequest httpRequest = HTTPHelper.prepareGet("/differentcode/", headers);
+        HttpRequest httpRequest = HTTPHelper.prepareGet("/differentcode/", headers, "");
         boolean isOk = HTTPHelper.runRequestForStatus(httpRequest, target, client, context, status);
         assertTrue(isOk);
 
-        httpRequest = HTTPHelper.prepareGet("/", headers);
+        httpRequest = HTTPHelper.prepareGet("/", headers, "");
         isOk = HTTPHelper.runRequestForStatus(httpRequest, target, client, context, status);
         assertFalse(isOk);
     }
 
     @Test
     public void testRunRequestForStatusWithoutStatus() throws Exception {
-        HttpRequest httpRequest = HTTPHelper.prepareGet("/", headers);
+        HttpRequest httpRequest = HTTPHelper.prepareGet("/", headers, "");
         boolean isOk = HTTPHelper.runRequestForStatus(httpRequest, target, client, context);
         assertTrue(isOk);
 
-        httpRequest = HTTPHelper.prepareGet("/differentcode/", headers);
+        httpRequest = HTTPHelper.prepareGet("/differentcode/", headers, "");
         isOk = HTTPHelper.runRequestForStatus(httpRequest, target, client, context);
         assertFalse(isOk);
     }

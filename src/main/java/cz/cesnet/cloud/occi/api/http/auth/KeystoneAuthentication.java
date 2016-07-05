@@ -120,7 +120,7 @@ public class KeystoneAuthentication extends HTTPAuthentication {
 
     private String authenticateAgainstKeystone(HttpHost target, String path, CloseableHttpClient client, HttpContext context, String tenant) throws CommunicationException {
         try {
-            HttpPost httpPost = HTTPHelper.preparePost(path + "/tokens", getHeaders());
+            HttpPost httpPost = HTTPHelper.preparePost("/tokens", getHeaders(), path);
             httpPost.setEntity(new StringEntity(getRequestBody(tenant)));
 
             try (CloseableHttpResponse response = HTTPHelper.runRequest(httpPost, target, client, context)) {
@@ -133,7 +133,7 @@ public class KeystoneAuthentication extends HTTPAuthentication {
 
     private String getTenants(HttpHost target, String path, CloseableHttpClient client, HttpContext context) throws CommunicationException {
         try {
-            HttpGet httpGet = HTTPHelper.prepareGet(path + "/tenants", getHeaders());
+            HttpGet httpGet = HTTPHelper.prepareGet("/tenants", getHeaders(), path);
             try (CloseableHttpResponse response = HTTPHelper.runRequest(httpGet, target, client, context)) {
                 return EntityUtils.toString(response.getEntity());
             }

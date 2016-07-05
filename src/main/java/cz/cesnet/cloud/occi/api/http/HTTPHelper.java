@@ -28,84 +28,84 @@ public class HTTPHelper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HTTPHelper.class);
 
-    public static HttpGet prepareGet(String uri, Header[] headers) {
-        HttpGet httpGet = new HttpGet(uri);
+    public static HttpGet prepareGet(String uri, Header[] headers, String prefix) {
+        HttpGet httpGet = new HttpGet(prefix + uri);
         httpGet.setHeaders(headers);
         return httpGet;
     }
 
     public static HttpGet prepareGet(String uri) {
-        return prepareGet(uri, null);
+        return prepareGet(uri, null, "");
     }
 
-    public static HttpHead prepareHead(String uri, Header[] headers) {
-        HttpHead httpHead = new HttpHead(uri);
+    public static HttpHead prepareHead(String uri, Header[] headers, String prefix) {
+        HttpHead httpHead = new HttpHead(prefix + uri);
         httpHead.setHeaders(headers);
         return httpHead;
     }
 
     public static HttpHead prepareHead(String uri) {
-        return prepareHead(uri, null);
+        return prepareHead(uri, null, "");
     }
 
-    public static HttpGet prepareGet(URI uri, Header[] headers) {
-        HttpGet httpGet = new HttpGet(uri);
+    public static HttpGet prepareGet(URI uri, Header[] headers, String prefix) {
+        HttpGet httpGet = new HttpGet(prefix + uri);
         httpGet.setHeaders(headers);
         return httpGet;
     }
 
     public static HttpGet prepareGet(URI uri) {
-        return prepareGet(uri, null);
+        return prepareGet(uri, null, "");
     }
 
-    public static HttpHead prepareHead(URI uri, Header[] headers) {
-        HttpHead httpHead = new HttpHead(uri);
+    public static HttpHead prepareHead(URI uri, Header[] headers, String prefix) {
+        HttpHead httpHead = new HttpHead(prefix + uri);
         httpHead.setHeaders(headers);
         return httpHead;
     }
 
     public static HttpHead prepareHead(URI uri) {
-        return prepareHead(uri, null);
+        return prepareHead(uri, null, "");
     }
 
-    public static HttpDelete prepareDelete(String uri, Header[] headers) {
-        HttpDelete httpDelete = new HttpDelete(uri);
+    public static HttpDelete prepareDelete(String uri, Header[] headers, String prefix) {
+        HttpDelete httpDelete = new HttpDelete(prefix + uri);
         httpDelete.setHeaders(headers);
         return httpDelete;
     }
 
     public static HttpDelete prepareDelete(String uri) {
-        return prepareDelete(uri, null);
+        return prepareDelete(uri, null, "");
     }
 
-    public static HttpDelete prepareDelete(URI uri, Header[] headers) {
-        HttpDelete httpDelete = new HttpDelete(uri);
+    public static HttpDelete prepareDelete(URI uri, Header[] headers, String prefix) {
+        HttpDelete httpDelete = new HttpDelete(prefix + uri);
         httpDelete.setHeaders(headers);
         return httpDelete;
     }
 
     public static HttpDelete prepareDelete(URI uri) {
-        return prepareDelete(uri, null);
+        return prepareDelete(uri, null, "");
     }
 
-    public static HttpPost preparePost(String uri, Header[] headers) {
-        HttpPost httpPost = new HttpPost(uri);
+    public static HttpPost preparePost(String uri, Header[] headers, String prefix) {
+        HttpPost httpPost = new HttpPost(prefix + uri);
         httpPost.setHeaders(headers);
         return httpPost;
     }
 
     public static HttpPost preparePost(String uri) {
-        return preparePost(uri, null);
+        return preparePost(uri, null, "");
     }
 
-    public static HttpPost preparePost(URI uri, Header[] headers) {
-        HttpPost httpPost = new HttpPost(uri);
+    public static HttpPost preparePost(URI uri, Header[] headers, String prefix) {
+        HttpPost httpPost = new HttpPost(prefix + uri);
         httpPost.setHeaders(headers);
         return httpPost;
     }
 
     public static HttpPost preparePost(URI uri) {
-        return preparePost(uri, null);
+        return preparePost(uri, null, "");
     }
 
     public static CloseableHttpResponse runRequest(HttpRequest httpRequest, HttpHost target, CloseableHttpClient client, HttpContext context, int status
