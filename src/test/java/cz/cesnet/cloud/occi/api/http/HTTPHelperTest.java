@@ -38,7 +38,7 @@ public class HTTPHelperTest {
     private URI uuri;
     private CloseableHttpClient client;
     private HttpContext context;
-    private int status;
+    private int[] statuses;
     private HttpHost target;
     private String prefix;
 
@@ -54,7 +54,7 @@ public class HTTPHelperTest {
         uuri = URI.create(uri);
         client = HttpClients.createDefault();
         context = HttpClientContext.create();
-        status = HttpStatus.SC_ACCEPTED;
+        statuses = new int[]{HttpStatus.SC_ACCEPTED};
         target = new HttpHost("localhost", 8123, "http");
         prefix = "/prefix";
     }
@@ -190,7 +190,7 @@ public class HTTPHelperTest {
     @Test
     public void testRunRequestWithStatus() throws Exception {
         HttpRequest httpRequest = HTTPHelper.prepareGet("/differentcode/", headers, "");
-        CloseableHttpResponse response = HTTPHelper.runRequest(httpRequest, target, client, context, status);
+        CloseableHttpResponse response = HTTPHelper.runRequest(httpRequest, target, client, context, statuses);
 
         assertNotNull(response);
         assertEquals(HttpStatus.SC_ACCEPTED, response.getStatusLine().getStatusCode());
@@ -200,14 +200,14 @@ public class HTTPHelperTest {
     public void testInvalidRunRequestWithStatus() throws Exception {
         HttpRequest httpRequest = HTTPHelper.prepareGet("/xyz/", headers, "");
         try {
-            CloseableHttpResponse response = HTTPHelper.runRequest(httpRequest, target, client, context, status);
+            CloseableHttpResponse response = HTTPHelper.runRequest(httpRequest, target, client, context, statuses);
         } catch (CommunicationException ex) {
             //cool
         }
 
         target = new HttpHost("nonexisting", 8123, "http");
         try {
-            CloseableHttpResponse response = HTTPHelper.runRequest(httpRequest, target, client, context, status);
+            CloseableHttpResponse response = HTTPHelper.runRequest(httpRequest, target, client, context, statuses);
         } catch (CommunicationException ex) {
             //cool
         }
@@ -242,11 +242,11 @@ public class HTTPHelperTest {
     @Test
     public void testRunRequestForStatusWithStatus() throws Exception {
         HttpRequest httpRequest = HTTPHelper.prepareGet("/differentcode/", headers, "");
-        boolean isOk = HTTPHelper.runRequestForStatus(httpRequest, target, client, context, status);
+        boolean isOk = HTTPHelper.runRequestForStatus(httpRequest, target, client, context, statuses);
         assertTrue(isOk);
 
         httpRequest = HTTPHelper.prepareGet("/", headers, "");
-        isOk = HTTPHelper.runRequestForStatus(httpRequest, target, client, context, status);
+        isOk = HTTPHelper.runRequestForStatus(httpRequest, target, client, context, statuses);
         assertFalse(isOk);
     }
 

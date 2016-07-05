@@ -108,11 +108,17 @@ public class HTTPHelper {
         return preparePost(uri, null, "");
     }
 
-    public static CloseableHttpResponse runRequest(HttpRequest httpRequest, HttpHost target, CloseableHttpClient client, HttpContext context, int status
+    public static CloseableHttpResponse runRequest(HttpRequest httpRequest, HttpHost target, CloseableHttpClient client, HttpContext context, int[] statuses
     ) throws CommunicationException {
         try {
             CloseableHttpResponse response = client.execute(target, httpRequest, context);
-            if (response.getStatusLine().getStatusCode() != status) {
+            boolean acceptableStatus = false;
+            for (int status : statuses) {
+                if (response.getStatusLine().getStatusCode() == status) {
+                    acceptableStatus = true;
+                }
+            }
+            if (!acceptableStatus) {
                 HttpEntity entity = response.getEntity();
                 String body = "";
                 if (entity != null) {
@@ -129,14 +135,20 @@ public class HTTPHelper {
     }
 
     public static CloseableHttpResponse runRequest(HttpRequest httpRequest, HttpHost target, CloseableHttpClient client, HttpContext context) throws CommunicationException {
-        return runRequest(httpRequest, target, client, context, HttpStatus.SC_OK);
+        return runRequest(httpRequest, target, client, context, new int[]{HttpStatus.SC_OK});
     }
 
-    public static boolean runRequestForStatus(HttpRequest httpRequest, HttpHost target, CloseableHttpClient client, HttpContext context, int status
+    public static boolean runRequestForStatus(HttpRequest httpRequest, HttpHost target, CloseableHttpClient client, HttpContext context, int[] statuses
     ) throws CommunicationException {
         try {
             try (CloseableHttpResponse response = client.execute(target, httpRequest, context)) {
-                return response.getStatusLine().getStatusCode() == status;
+                boolean acceptableStatus = false;
+                for (int status : statuses) {
+                    if (response.getStatusLine().getStatusCode() == status) {
+                        acceptableStatus = true;
+                    }
+                }
+                return acceptableStatus;
             }
         } catch (IOException ex) {
             throw new CommunicationException(ex);
@@ -144,7 +156,8 @@ public class HTTPHelper {
     }
 
     public static boolean runRequestForStatus(HttpRequest httpRequest, HttpHost target, CloseableHttpClient client, HttpContext context) throws CommunicationException {
-        return runRequestForStatus(httpRequest, target, client, context, HttpStatus.SC_OK);
+        return runRequestForStatus(httpRequest, target, client, context, new int[]{HttpStatus.SC_OK, HttpStatus.SC_NO_CONTENT});
+    }
 
     private static String addPrefix(String uri, String prefix) {
         if (uri.contains(prefix)) {

@@ -183,9 +183,9 @@ public class HTTPClient extends Client {
         return javaHeaders;
     }
 
-    private void runAndParseRequest(HttpRequest request, int status) throws CommunicationException {
+    private void runAndParseRequest(HttpRequest request, int[] statuses) throws CommunicationException {
         try {
-            try (CloseableHttpResponse response = HTTPHelper.runRequest(request, target, connection.getClient(), connection.getContext(), status)) {
+            try (CloseableHttpResponse response = HTTPHelper.runRequest(request, target, connection.getClient(), connection.getContext(), statuses)) {
                 responseMediaType = response.getFirstHeader(HttpHeaders.CONTENT_TYPE).getValue();
                 if (responseMediaType.contains(";")) {
                     responseMediaType = responseMediaType.substring(0, responseMediaType.indexOf(";"));
@@ -199,7 +199,7 @@ public class HTTPClient extends Client {
     }
 
     private void runAndParseRequest(HttpRequest request) throws CommunicationException {
-        runAndParseRequest(request, HttpStatus.SC_OK);
+        runAndParseRequest(request, new int[]{HttpStatus.SC_OK, HttpStatus.SC_NO_CONTENT});
     }
 
     private void obtainModel() throws CommunicationException {
@@ -404,7 +404,7 @@ public class HTTPClient extends Client {
             }
 
             checkConnection();
-            runAndParseRequest(httpPost, HttpStatus.SC_CREATED);
+            runAndParseRequest(httpPost, new int[]{HttpStatus.SC_CREATED, HttpStatus.SC_OK});
 
             //HACK
             //so communication with servers with WRONG OCCI implementation will work
