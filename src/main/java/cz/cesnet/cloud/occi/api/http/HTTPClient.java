@@ -191,7 +191,12 @@ public class HTTPClient extends Client {
                     responseMediaType = responseMediaType.substring(0, responseMediaType.indexOf(";"));
                 }
                 responseHeaders = convertHeaders(response.getAllHeaders());
-                responseBody = EntityUtils.toString(response.getEntity());
+                HttpEntity responseEntity = response.getEntity();
+                if (responseEntity == null) {
+                    responseBody = "";
+                } else {
+                    responseBody = EntityUtils.toString(responseEntity);
+                }
             }
         } catch (IOException ex) {
             throw new CommunicationException(ex);
