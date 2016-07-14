@@ -34,6 +34,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
@@ -410,6 +411,54 @@ public class HTTPClient extends Client {
 
             checkConnection();
             runAndParseRequest(httpPost, new int[]{HttpStatus.SC_CREATED, HttpStatus.SC_OK});
+
+            //HACK
+            //so communication with servers with WRONG OCCI implementation will work
+            if (!responseMediaType.equals(MediaType.TEXT_OCCI) && responseBody.trim().equals("OK") && responseHeaders.containsKey("Location")) {
+                responseMediaType = MediaType.TEXT_OCCI;
+            }
+            //HACK
+
+            List<URI> locations = parser.parseLocations(responseMediaType, responseBody, responseHeaders);
+            if (locations == null || locations.isEmpty()) {
+                throw new CommunicationException("no location returned");
+            }
+
+            return locations.get(0);
+        } catch (RenderingException | ParsingException | UnsupportedEncodingException ex) {
+            throw new CommunicationException(ex);
+        }
+    }
+
+    /**
+     * @see Client#update(cz.cesnet.cloud.occi.core.Entity)
+     */
+    @Override
+    public URI update(Entity entity) throws CommunicationException {
+        Kind kind = entity.getKind();
+        if (kind == null) {
+            throw new CommunicationException("entity with empty kind");
+        }
+
+        HttpPut httpPut = HTTPHelper.preparePut(kind.getLocation() + entity.getId(), connection.getHeaders(), connection.getPrefix());
+        try {
+            switch (mediaType) {
+                case MediaType.TEXT_OCCI: {
+                    Headers headers = entity.toHeaders();
+                    addHeaders(httpPut, headers);
+                }
+                break;
+                case MediaType.TEXT_PLAIN: {
+                    HttpEntity httpEntity = new StringEntity(entity.toText());
+                    httpPut.setEntity(httpEntity);
+                }
+                break;
+                default:
+                    throw new CommunicationException("unsupported media type '" + mediaType + "'");
+            }
+
+            checkConnection();
+            runAndParseRequest(httpPut, new int[]{HttpStatus.SC_CREATED, HttpStatus.SC_OK});
 
             //HACK
             //so communication with servers with WRONG OCCI implementation will work
