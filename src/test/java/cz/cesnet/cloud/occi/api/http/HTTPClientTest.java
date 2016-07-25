@@ -497,6 +497,20 @@ public class HTTPClientTest {
     }
 
     @Test
+    public void testUpdate() throws Exception {
+        client.connect();
+        Model model = client.getModel();
+        EntityBuilder eb = new EntityBuilder(model);
+        Resource r = eb.getResource("compute");
+        r.setId("157754bb-af01-40be-853a-6a1f1b5ac500");
+
+        assertEquals(URI.create("http://rocci-server-1-1-x.herokuapp.com:80/compute/157754bb-af01-40be-853a-6a1f1b5ac500"), client.update(r));
+        client.setMediaType(MediaType.TEXT_OCCI);
+        r.setId("5537b49a-bb2e-4302-bf8b-da38611247ca");
+        assertEquals(URI.create("http://rocci-server-1-1-x.herokuapp.com:80/compute/5537b49a-bb2e-4302-bf8b-da38611247ca"), client.update(r));
+    }
+
+    @Test
     public void testDeleteWithString() throws Exception {
         client.connect();
 

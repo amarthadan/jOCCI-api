@@ -13,6 +13,7 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
@@ -106,6 +107,26 @@ public class HTTPHelper {
 
     public static HttpPost preparePost(URI uri) {
         return preparePost(uri, null, "");
+    }
+
+    public static HttpPut preparePut(String uri, Header[] headers, String prefix) {
+        HttpPut httpPut = new HttpPut(addPrefix(uri, prefix));
+        httpPut.setHeaders(headers);
+        return httpPut;
+    }
+
+    public static HttpPut preparePut(String uri) {
+        return preparePut(uri, null, "");
+    }
+
+    public static HttpPut preparePut(URI uri, Header[] headers, String prefix) {
+        HttpPut httpPut = new HttpPut(addPrefix(uri.toString(), prefix));
+        httpPut.setHeaders(headers);
+        return httpPut;
+    }
+
+    public static HttpPut preparePut(URI uri) {
+        return preparePut(uri, null, "");
     }
 
     public static CloseableHttpResponse runRequest(HttpRequest httpRequest, HttpHost target, CloseableHttpClient client, HttpContext context, int[] statuses
